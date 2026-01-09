@@ -1,0 +1,16 @@
+{
+  "name": "sapukota",
+  "version": "1.0.0",
+  "description": "Sistem Pelaporan Sampah Liar",
+  "scripts": {
+    "install:all": "cd backend && npm install && cd ../frontend && npm install",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "seed:admin": "cd backend && npm run seed:admin",
+    "build:frontend": "cd frontend && npm run build"
+  },
+  "keywords": ["waste", "reporting", "environment"],
+  "author": "",
+  "license": "MIT"
+}
+
