@@ -4,10 +4,6 @@ import { reportsAPI } from '../services/api';
 import StatusBadge from '../components/StatusBadge';
 import CountUp from '../components/CountUp';
 import heroImage from '../assets/Img.png';
-import plasticBottle from '../assets/plastic-bottle.png';
-import plasticItem from '../assets/plastic-item.png';
-import greenGlasses from '../assets/green-glasses.png';
-import recycleBucket from '../assets/recycle-bucket.png';
 
 const Home = () => {
   const [recentReports, setRecentReports] = useState([]);
@@ -188,54 +184,8 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="bg-white pt-20 relative overflow-hidden">
-        {/* Floating Decorative Images */}
-        <img 
-          src={plasticBottle} 
-          alt="Plastic Bottle" 
-          className="absolute pointer-events-none"
-          style={{
-            width: '212px',
-            height: '317px',
-            top: '133px',
-          }}
-        />
-        <img 
-          src={plasticItem} 
-          alt="Plastic Item" 
-          className="absolute pointer-events-none"
-          style={{
-            width: '200px',
-            height: '150px',
-            top: '120px',
-            left: '931px'
-          }}
-        />
-        <img 
-          src={greenGlasses} 
-          alt="Green Glasses" 
-          className="absolute pointer-events-none"
-          style={{
-            width: '122px',
-            height: '81px',
-            top: '100px',
-            left: '1200px',
-            transform: 'translateX(-50%)'
-          }}
-        />
-        <img 
-          src={recycleBucket} 
-          alt="Recycle Bucket" 
-          className="absolute pointer-events-none"
-          style={{
-            width: '593px',
-            height: '396px',
-            top: '55px',
-            left: '1100px',
-          }}
-        />
-        
-        <div className="container mx-auto px-6 lg:px-20 relative z-10">
+      <section className="bg-white pt-20">
+        <div className="container mx-auto px-6 lg:px-20">
           <div className="max-w">
             {/* Heading */}
             <h1 className="font-medium mb-6" style={{ fontSize: '100px', lineHeight: '85%', letterSpacing: '-6%' }}>
