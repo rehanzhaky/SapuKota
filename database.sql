@@ -30,14 +30,11 @@ CREATE TABLE IF NOT EXISTS `users` (
 -- ============================================
 CREATE TABLE IF NOT EXISTS `reports` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `reporter_name` VARCHAR(255) NOT NULL,
-  `reporter_phone` VARCHAR(20) NOT NULL,
-  `reporter_email` VARCHAR(255) DEFAULT NULL,
+  `title` VARCHAR(255) NOT NULL,
   `location` TEXT NOT NULL,
   `latitude` DECIMAL(10, 8) DEFAULT NULL,
   `longitude` DECIMAL(11, 8) DEFAULT NULL,
   `description` TEXT NOT NULL,
-  `category` ENUM('sampah_rumah_tangga', 'sampah_industri', 'sampah_elektronik', 'sampah_bangunan', 'lainnya') NOT NULL DEFAULT 'sampah_rumah_tangga',
   `photo` VARCHAR(255) DEFAULT NULL,
   `status` ENUM('pending', 'approved', 'assigned', 'in_progress', 'completed', 'rejected') NOT NULL DEFAULT 'pending',
   `assigned_to` INT DEFAULT NULL,
@@ -49,7 +46,6 @@ CREATE TABLE IF NOT EXISTS `reports` (
   `updatedAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   INDEX `idx_status` (`status`),
-  INDEX `idx_category` (`category`),
   INDEX `idx_assigned_to` (`assigned_to`),
   INDEX `idx_created_at` (`createdAt`),
   CONSTRAINT `fk_reports_assigned_to` 
@@ -84,18 +80,15 @@ INSERT INTO `users` (`name`, `email`, `password`, `role`, `phone`, `status`) VAL
 ('Petugas C', 'petugas3@sapukota.id', '$2b$10$YourHashedPasswordHere', 'petugas', '081234567893', 'active')
 ON DUPLICATE KEY UPDATE `name` = `name`;
 
--- Sample Reports
-INSERT INTO `reports` (
-  `reporter_name`, `reporter_phone`, `reporter_email`, 
-  `location`, `latitude`, `longitude`, 
-  `description`, `category`, `status`
-) VALUES
-('John Doe', '081234567890', 'john@example.com', 'Jl. Sudirman No. 123, Jakarta', -6.200000, 106.816666, 'Tumpukan sampah di pinggir jalan', 'sampah_rumah_tangga', 'pending'),
-('Jane Smith', '081234567891', 'jane@example.com', 'Jl. Thamrin No. 45, Jakarta', -6.195000, 106.823000, 'Sampah elektronik bekas', 'sampah_elektronik', 'approved'),
-('Bob Wilson', '081234567892', 'bob@example.com', 'Jl. Gatot Subroto No. 78, Jakarta', -6.210000, 106.830000, 'Puing bangunan', 'sampah_bangunan', 'assigned'),
-('Alice Brown', '081234567893', 'alice@example.com', 'Jl. Rasuna Said No. 90, Jakarta', -6.220000, 106.840000, 'Sampah industri', 'sampah_industri', 'in_progress'),
-('Charlie Davis', '081234567894', 'charlie@example.com', 'Jl. HR Rasuna Said No. 12, Jakarta', -6.225000, 106.845000, 'Sampah rumah tangga menumpuk', 'sampah_rumah_tangga', 'completed')
-ON DUPLICATE KEY UPDATE `reporter_name` = `reporter_name`;
+-- Sample Reports (for testing)
+INSERT INTO `reports` (`title`, `location`, `latitude`, `longitude`, `description`, `photo`, `status`)
+VALUES
+('Sampah di Jl. Sudirman', 'Jl. Sudirman No. 10, Jakarta', -6.208800, 106.845600, 'Tumpukan sampah rumah tangga di pinggir jalan', NULL, 'pending'),
+('Sampah Elektronik Bekas', 'Jl. Thamrin No. 45, Jakarta', -6.195000, 106.823000, 'Sampah elektronik bekas', NULL, 'approved'),
+('Puing Bangunan', 'Jl. Gatot Subroto No. 78, Jakarta', -6.210000, 106.830000, 'Puing bangunan', NULL, 'assigned'),
+('Sampah Industri', 'Jl. Rasuna Said No. 90, Jakarta', -6.220000, 106.840000, 'Sampah industri', NULL, 'in_progress'),
+('Sampah Menumpuk', 'Jl. HR Rasuna Said No. 12, Jakarta', -6.225000, 106.845000, 'Sampah rumah tangga menumpuk', NULL, 'completed')
+ON DUPLICATE KEY UPDATE `title` = `title`;
 
 -- ============================================
 -- Indexes for Performance
@@ -110,9 +103,8 @@ ON DUPLICATE KEY UPDATE `reporter_name` = `reporter_name`;
 CREATE OR REPLACE VIEW `active_reports_summary` AS
 SELECT 
   r.id,
-  r.reporter_name,
+  r.title,
   r.location,
-  r.category,
   r.status,
   r.createdAt,
   u.name AS assigned_petugas_name
@@ -141,7 +133,11 @@ ORDER BY completed_tasks DESC;
 -- ============================================
 -- Stored Procedures (Optional)
 -- ============================================
+-- NOTE: Jika mendapat error saat membuat stored procedure,
+-- jalankan: mysql_upgrade -u root -p
+-- Error ini terjadi karena perbedaan versi MariaDB
 
+/*
 DELIMITER $$
 
 -- Procedure: Get Dashboard Statistics
@@ -159,11 +155,15 @@ BEGIN
 END$$
 
 DELIMITER ;
+*/
 
 -- ============================================
--- Triggers (Optional - untuk audit log)
+-- Triggers (Optional)
 -- ============================================
+-- NOTE: Jika mendapat error saat membuat trigger,
+-- jalankan: mysql_upgrade -u root -p
 
+/*
 -- Trigger: Update completed_at when status changes to completed
 DELIMITER $$
 
@@ -177,6 +177,7 @@ BEGIN
 END$$
 
 DELIMITER ;
+*/
 
 -- ============================================
 -- Grant Permissions (Optional)

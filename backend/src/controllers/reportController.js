@@ -4,17 +4,14 @@ const { Op } = require('sequelize');
 // Public - Create new report
 exports.createReport = async (req, res) => {
   try {
-    const { reporter_name, reporter_phone, reporter_email, location, latitude, longitude, description, category } = req.body;
+    const { title, location, latitude, longitude, description } = req.body;
 
     const report = await Report.create({
-      reporter_name,
-      reporter_phone,
-      reporter_email,
+      title,
       location,
       latitude,
       longitude,
       description,
-      category,
       photo: req.file ? req.file.filename : null,
       status: 'pending'
     });
@@ -32,16 +29,15 @@ exports.createReport = async (req, res) => {
 // Public - Get all reports (for landing page)
 exports.getAllReports = async (req, res) => {
   try {
-    const { page = 1, limit = 10, status, category, search } = req.query;
+    const { page = 1, limit = 10, status, search } = req.query;
     const offset = (page - 1) * limit;
 
     const where = {};
     
     if (status) where.status = status;
-    if (category) where.category = category;
     if (search) {
       where[Op.or] = [
-        { reporter_name: { [Op.like]: `%${search}%` } },
+        { title: { [Op.like]: `%${search}%` } },
         { location: { [Op.like]: `%${search}%` } },
         { description: { [Op.like]: `%${search}%` } }
       ];

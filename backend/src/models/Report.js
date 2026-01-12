@@ -7,20 +7,9 @@ const Report = sequelize.define('Report', {
     primaryKey: true,
     autoIncrement: true
   },
-  reporter_name: {
+  title: {
     type: DataTypes.STRING,
     allowNull: false
-  },
-  reporter_phone: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
-  reporter_email: {
-    type: DataTypes.STRING,
-    allowNull: true,
-    validate: {
-      isEmail: true
-    }
   },
   location: {
     type: DataTypes.STRING,
@@ -36,10 +25,6 @@ const Report = sequelize.define('Report', {
   },
   description: {
     type: DataTypes.TEXT,
-    allowNull: false
-  },
-  category: {
-    type: DataTypes.ENUM('sampah_rumah_tangga', 'sampah_industri', 'sampah_elektronik', 'sampah_bangunan', 'lainnya'),
     allowNull: false
   },
   photo: {
