@@ -1,12 +1,17 @@
 import { useState, useEffect } from 'react';
 import { usersAPI, reportsAPI } from '../../services/api';
 import StatusBadge from '../../components/StatusBadge';
+import PetugasNavigationMap from '../../components/PetugasNavigationMap';
 
 const DashboardPetugas = () => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedTask, setSelectedTask] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [showNavigationModal, setShowNavigationModal] = useState(false);
+  const [navigationTask, setNavigationTask] = useState(null);
+  const [checkingIn, setCheckingIn] = useState(false);
+  const [accepting, setAccepting] = useState(false);
   const [formData, setFormData] = useState({
     status: '',
     completion_notes: '',
@@ -20,7 +25,7 @@ const DashboardPetugas = () => {
   const fetchTasks = async () => {
     try {
       const response = await usersAPI.getMyTasks();
-      setTasks(response.data);
+      setTasks(response.data.data || response.data || []);
     } catch (error) {
       console.error('Error fetching tasks:', error);
     } finally {
@@ -43,8 +48,119 @@ const DashboardPetugas = () => {
     setSelectedTask(null);
   };
 
+  const handleOpenNavigationModal = (task) => {
+    setNavigationTask(task);
+    setShowNavigationModal(true);
+  };
+
+  const handleCloseNavigationModal = () => {
+    setShowNavigationModal(false);
+    setNavigationTask(null);
+  };
+
+  const handleAcceptTask = async (taskId) => {
+    if (!navigator.geolocation) {
+      alert('Browser Anda tidak mendukung GPS location');
+      return;
+    }
+
+    const confirmed = window.confirm('📍 Anda akan menerima tugas ini. Posisi GPS Anda akan direkam. Lanjutkan?');
+    if (!confirmed) return;
+
+    setAccepting(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          await reportsAPI.acceptTask(taskId, {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+          });
+          alert('✅ Tugas berhasil diterima! Status diubah ke "In Progress". Posisi Anda telah terekam.');
+          fetchTasks();
+        } catch (error) {
+          alert('Gagal menerima tugas: ' + (error.response?.data?.message || error.message));
+        } finally {
+          setAccepting(false);
+        }
+      },
+      (error) => {
+        setAccepting(false);
+        alert('Gagal mendapatkan lokasi GPS: ' + error.message);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      }
+    );
+  };
+
+  const handleCheckIn = async (taskId) => {
+    if (!navigator.geolocation) {
+      alert('Browser Anda tidak mendukung GPS location');
+      return;
+    }
+
+    setCheckingIn(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          await reportsAPI.checkIn(taskId, {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+          });
+          alert('✅ Check-in berhasil! Anda sudah berada di lokasi.');
+          fetchTasks();
+        } catch (error) {
+          alert('Gagal check-in: ' + (error.response?.data?.message || error.message));
+        } finally {
+          setCheckingIn(false);
+        }
+      },
+      (error) => {
+        setCheckingIn(false);
+        alert('Gagal mendapatkan lokasi GPS: ' + error.message);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      }
+    );
+  };
+
   const handleUpdate = async (e) => {
     e.preventDefault();
+    
+    // If completing task, get GPS first
+    if (formData.status === 'completed') {
+      if (!navigator.geolocation) {
+        alert('Browser Anda tidak mendukung GPS location');
+        return;
+      }
+
+      const confirmed = window.confirm('📍 Menyelesaikan tugas akan merekam posisi GPS Anda. Lanjutkan?');
+      if (!confirmed) return;
+
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          await submitUpdate(position.coords.latitude, position.coords.longitude);
+        },
+        (error) => {
+          alert('Gagal mendapatkan lokasi GPS: ' + error.message);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        }
+      );
+    } else {
+      await submitUpdate();
+    }
+  };
+
+  const submitUpdate = async (latitude = null, longitude = null) => {
     try {
       const data = new FormData();
       data.append('status', formData.status);
@@ -53,6 +169,10 @@ const DashboardPetugas = () => {
       }
       if (formData.completion_photo) {
         data.append('completion_photo', formData.completion_photo);
+      }
+      if (latitude && longitude) {
+        data.append('latitude', latitude);
+        data.append('longitude', longitude);
       }
 
       await reportsAPI.updateProgress(selectedTask.id, data);
@@ -99,39 +219,24 @@ const DashboardPetugas = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4">
-        <h1 className="text-4xl font-bold text-gray-800 mb-2">Dashboard Petugas</h1>
+        <h1 className="text-4xl font-bold text-gray-900 mb-2">Dashboard Petugas</h1>
         <p className="text-gray-600 mb-8">Kelola tugas pengangkutan sampah Anda</p>
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="card bg-gradient-to-br from-blue-500 to-blue-600 text-white">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-blue-100 text-sm mb-1">Total Tugas</p>
-                <p className="text-3xl font-bold">{tasks.length}</p>
-              </div>
-              <div className="text-5xl opacity-50">📋</div>
-            </div>
+          <div className="bg-white rounded-2xl shadow-md p-6 border-l-4 border-blue-500 hover:shadow-lg transition-shadow">
+            <p className="text-gray-500 text-sm font-medium mb-2">Total Tugas</p>
+            <p className="text-4xl font-bold text-gray-900">{tasks.length}</p>
           </div>
 
-          <div className="card bg-gradient-to-br from-orange-500 to-orange-600 text-white">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-orange-100 text-sm mb-1">Tugas Aktif</p>
-                <p className="text-3xl font-bold">{activeTasks.length}</p>
-              </div>
-              <div className="text-5xl opacity-50">🚛</div>
-            </div>
+          <div className="bg-white rounded-2xl shadow-md p-6 border-l-4 border-orange-500 hover:shadow-lg transition-shadow">
+            <p className="text-gray-500 text-sm font-medium mb-2">Tugas Aktif</p>
+            <p className="text-4xl font-bold text-gray-900">{activeTasks.length}</p>
           </div>
 
-          <div className="card bg-gradient-to-br from-green-500 to-green-600 text-white">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-green-100 text-sm mb-1">Selesai</p>
-                <p className="text-3xl font-bold">{completedTasks.length}</p>
-              </div>
-              <div className="text-5xl opacity-50">✅</div>
-            </div>
+          <div className="bg-white rounded-2xl shadow-md p-6 border-l-4 border-green-500 hover:shadow-lg transition-shadow">
+            <p className="text-gray-500 text-sm font-medium mb-2">Selesai</p>
+            <p className="text-4xl font-bold text-gray-900">{completedTasks.length}</p>
           </div>
         </div>
 
@@ -153,8 +258,20 @@ const DashboardPetugas = () => {
                       className="w-full h-48 object-cover rounded-lg mb-4"
                     />
                   )}
-                  <div className="mb-3">
-                    <StatusBadge status={task.status} />
+                  <div className="mb-3 flex items-center justify-between">
+                    <StatusBadge status={task.status} context="petugas" />
+                    <div className="flex gap-2">
+                      {task.accepted_at && (
+                        <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded-full font-medium flex items-center gap-1">
+                          ✓ Diterima
+                        </span>
+                      )}
+                      {task.arrived_at && (
+                        <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full font-medium flex items-center gap-1">
+                          ✓ Di lokasi
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <h3 className="font-bold text-lg text-gray-800 mb-2">{task.location}</h3>
                   <p className="text-sm text-gray-600 mb-3 line-clamp-2">{task.description}</p>
@@ -168,13 +285,61 @@ const DashboardPetugas = () => {
                     <p className="text-gray-600">
                       <span className="font-medium">Telepon:</span> {task.reporter_phone}
                     </p>
+                    {task.accepted_at && (
+                      <p className="text-gray-600">
+                        <span className="font-medium">Diterima:</span> {formatDate(task.accepted_at)}
+                      </p>
+                    )}
+                    {task.arrived_at && (
+                      <p className="text-gray-600">
+                        <span className="font-medium">Sampai di lokasi:</span> {formatDate(task.arrived_at)}
+                      </p>
+                    )}
                   </div>
-                  <button
-                    onClick={() => handleOpenModal(task)}
-                    className="w-full btn-primary"
-                  >
-                    Update Status
-                  </button>
+                  <div className="space-y-2">
+                    {/* Tombol Navigasi - untuk semua tugas dengan GPS */}
+                    {task.latitude && task.longitude && (
+                      <button
+                        onClick={() => handleOpenNavigationModal(task)}
+                        className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                      >
+                        🗺️ Navigasi ke Lokasi
+                      </button>
+                    )}
+                    {/* Tombol Terima Tugas - hanya untuk status assigned */}
+                    {task.status === 'assigned' && !task.accepted_at && (
+                      <button
+                        onClick={() => handleAcceptTask(task.id)}
+                        disabled={accepting}
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      >
+                        {accepting ? (
+                          <>⏳ Merekam GPS...</>
+                        ) : (
+                          <>✋ Terima Tugas (GPS)</>
+                        )}
+                      </button>
+                    )}
+                    {/* Tombol Check-in - untuk in_progress yang belum sampai */}
+                    {task.status === 'in_progress' && !task.arrived_at && (
+                      <button
+                        onClick={() => handleCheckIn(task.id)}
+                        disabled={checkingIn}
+                        className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {checkingIn ? '📍 Mengambil GPS...' : '📍 Saya Sudah Sampai'}
+                      </button>
+                    )}
+                    {/* Tombol Update Status - untuk yang sudah in_progress */}
+                    {task.status === 'in_progress' && (
+                      <button
+                        onClick={() => handleOpenModal(task)}
+                        className="w-full btn-primary"
+                      >
+                        Update Status
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -193,7 +358,7 @@ const DashboardPetugas = () => {
               {completedTasks.map((task) => (
                 <div key={task.id} className="card border-l-4 border-green-500 opacity-75">
                   <div className="mb-3">
-                    <StatusBadge status={task.status} />
+                    <StatusBadge status={task.status} context="petugas" />
                   </div>
                   <h3 className="font-bold text-lg text-gray-800 mb-2">{task.location}</h3>
                   <p className="text-sm text-gray-600 mb-3">{getCategoryLabel(task.category)}</p>
@@ -295,6 +460,26 @@ const DashboardPetugas = () => {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Navigation Modal */}
+      {showNavigationModal && navigationTask && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[95vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
+              <h2 className="text-xl font-bold text-gray-800">Navigasi ke Lokasi</h2>
+              <button
+                onClick={handleCloseNavigationModal}
+                className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
+              >
+                ×
+              </button>
+            </div>
+            <div className="p-6">
+              <PetugasNavigationMap report={navigationTask} />
             </div>
           </div>
         </div>

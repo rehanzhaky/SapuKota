@@ -101,66 +101,64 @@ const KelolaPetugas = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-800">Kelola Petugas</h1>
-          <button onClick={() => handleOpenModal()} className="btn-primary">
-            + Tambah Petugas
-          </button>
-        </div>
+    <div>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-4xl font-bold text-gray-900">Kelola Petugas</h1>
+        <button onClick={() => handleOpenModal()} className="btn-primary">
+          + Tambah Petugas
+        </button>
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {petugas.map((p) => (
-            <div key={p.id} className="card">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <h3 className="text-xl font-bold text-gray-800">{p.name}</h3>
-                  <span className={`inline-block px-2 py-1 rounded text-xs font-semibold mt-2 ${
-                    p.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                  }`}>
-                    {p.status === 'active' ? 'Aktif' : 'Nonaktif'}
-                  </span>
-                </div>
-              </div>
-              
-              <div className="space-y-2 text-sm mb-4">
-                <p className="text-gray-600">
-                  <span className="font-medium">Email:</span> {p.email}
-                </p>
-                <p className="text-gray-600">
-                  <span className="font-medium">Telepon:</span> {p.phone}
-                </p>
-                <p className="text-gray-600">
-                  <span className="font-medium">Bergabung:</span>{' '}
-                  {new Date(p.createdAt).toLocaleDateString('id-ID')}
-                </p>
-              </div>
-
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => handleOpenModal(p)}
-                  className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg transition-colors"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDelete(p.id)}
-                  className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg transition-colors"
-                >
-                  Hapus
-                </button>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {petugas.map((p) => (
+          <div key={p.id} className="bg-white rounded-2xl shadow-md p-6 border border-gray-200 hover:shadow-lg transition-shadow">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex-1">
+                <h3 className="text-xl font-bold text-gray-900">{p.name}</h3>
+                <span className={`inline-block px-2 py-1 rounded text-xs font-semibold mt-2 ${
+                  p.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                }`}>
+                  {p.status === 'active' ? 'Aktif' : 'Nonaktif'}
+                </span>
               </div>
             </div>
-          ))}
-        </div>
+            
+            <div className="space-y-2 text-sm mb-4">
+              <p className="text-gray-600">
+                <span className="font-medium">Email:</span> {p.email}
+              </p>
+              <p className="text-gray-600">
+                <span className="font-medium">Telepon:</span> {p.phone}
+              </p>
+              <p className="text-gray-600">
+                <span className="font-medium">Bergabung:</span>{' '}
+                {new Date(p.createdAt).toLocaleDateString('id-ID')}
+              </p>
+            </div>
 
-        {petugas.length === 0 && (
-          <div className="text-center py-12 text-gray-500">
-            Belum ada petugas. Klik tombol "Tambah Petugas" untuk menambahkan.
+            <div className="flex space-x-2">
+              <button
+                onClick={() => handleOpenModal(p)}
+                className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg transition-colors"
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => handleDelete(p.id)}
+                className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg transition-colors"
+              >
+                Hapus
+              </button>
+            </div>
           </div>
-        )}
+        ))}
       </div>
+
+      {petugas.length === 0 && (
+        <div className="text-center py-12 text-gray-500">
+          Belum ada petugas. Klik tombol "Tambah Petugas" untuk menambahkan.
+        </div>
+      )}
 
       {/* Modal */}
       {showModal && (

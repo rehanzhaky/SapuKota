@@ -14,7 +14,9 @@ router.get('/:id', reportController.getReportById);
 router.put('/:id/status', auth, adminDLH, reportController.updateReportStatus);
 
 // Petugas routes
+router.post('/:id/accept', auth, petugas, reportController.acceptTask);
 router.put('/:id/progress', auth, petugas, upload.single('completion_photo'), reportController.updateTaskProgress);
+router.post('/:id/checkin', auth, petugas, reportController.checkInAtLocation);
 
 module.exports = router;
 

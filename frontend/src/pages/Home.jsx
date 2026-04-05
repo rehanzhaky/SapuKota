@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { reportsAPI } from '../services/api';
+import { reportsAPI, usersAPI } from '../services/api';
 import StatusBadge from '../components/StatusBadge';
 import CountUp from '../components/CountUp';
 import DomeGallery from '../components/DomeGallery';
@@ -85,8 +85,8 @@ const galleryImages = [
 const Home = () => {
   const [recentReports, setRecentReports] = useState(staticReports);
   const [loading, setLoading] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [loadingLocation, setLoadingLocation] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     location: '',
@@ -99,20 +99,20 @@ const Home = () => {
     total: 50,
     identified: 548,
     collected: 554,
-    volunteers: 82
+    petugas: 0
   });
 
   useEffect(() => {
-    // Uncomment untuk fetch data dari backend
-    // fetchRecentReports();
-    // fetchStats();
+    // Fetch data dari backend
+    fetchRecentReports();
+    fetchStats();
   }, []);
 
   const fetchRecentReports = async () => {
     try {
       setLoading(true);
       const response = await reportsAPI.getRecent();
-      setRecentReports(response.data);
+      setRecentReports(response.data.data || []);
     } catch (error) {
       console.error('Error fetching reports:', error);
       // Fallback ke static data jika error
@@ -124,13 +124,19 @@ const Home = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await reportsAPI.getAll();
-      const reports = response.data.reports || [];
+      const [reportsResponse, petugasResponse] = await Promise.all([
+        reportsAPI.getAll(),
+        usersAPI.getPetugasCount()
+      ]);
+      
+      const reports = reportsResponse.data.reports || [];
+      const petugasCount = petugasResponse.data.count || 0;
+      
       setStats({
         total: reports.length,
         identified: reports.filter(r => ['approved', 'assigned', 'in_progress', 'completed'].includes(r.status)).length,
         collected: reports.filter(r => r.status === 'completed').length,
-        volunteers: 82 // Static for now
+        petugas: petugasCount
       });
     } catch (error) {
       console.error('Error fetching stats:', error);
@@ -151,7 +157,6 @@ const Home = () => {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setLoadingLocation(false);
     setFormData({
       title: '',
       location: '',
@@ -194,37 +199,73 @@ const Home = () => {
       }));
     }
   };
-
   const handleGetLocation = () => {
     if (!navigator.geolocation) {
-      alert('Geolocation tidak didukung oleh browser Anda');
+      alert('Browser Anda tidak mendukung geolocation');
       return;
     }
 
     setLoadingLocation(true);
+
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
+        const locationText = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+        
         setFormData(prev => ({
           ...prev,
-          latitude,
-          longitude,
-          location: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
+          location: locationText,
+          latitude: latitude,
+          longitude: longitude
         }));
         setLoadingLocation(false);
+        
+        // Optional: Try to get address from coordinates
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`)
+          .then(res => res.json())
+          .then(data => {
+            if (data.display_name) {
+              setFormData(prev => ({
+                ...prev,
+                location: data.display_name,
+                latitude: latitude,
+                longitude: longitude
+              }));
+            }
+          })
+          .catch(err => {
+            console.log('Reverse geocoding failed, using coordinates');
+          });
       },
       (error) => {
-        console.error('Error getting location:', error);
-        alert('Gagal mendapatkan lokasi. Pastikan Anda telah memberikan izin akses lokasi.');
+        console.error('Geolocation error:', error);
+        let errorMessage = 'Gagal mendapatkan lokasi. ';
+        
+        switch(error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage += 'Anda menolak akses lokasi. Silakan izinkan akses lokasi di browser Anda.';
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage += 'Informasi lokasi tidak tersedia.';
+            break;
+          case error.TIMEOUT:
+            errorMessage += 'Request timeout. Silakan coba lagi.';
+            break;
+          default:
+            errorMessage += 'Terjadi kesalahan yang tidak diketahui.';
+        }
+        
+        alert(errorMessage);
         setLoadingLocation(false);
       },
       {
         enableHighAccuracy: true,
-        timeout: 5000,
+        timeout: 10000,
         maximumAge: 0
       }
     );
   };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -235,19 +276,20 @@ const Home = () => {
       return;
     }
 
-    if (!formData.latitude || !formData.longitude) {
-      alert('Harap ambil lokasi Anda terlebih dahulu!');
-      return;
-    }
-
     try {
       const formDataToSend = new FormData();
       formDataToSend.append('title', formData.title);
       formDataToSend.append('location', formData.location);
-      formDataToSend.append('latitude', formData.latitude);
-      formDataToSend.append('longitude', formData.longitude);
       formDataToSend.append('description', formData.description);
       formDataToSend.append('photo', formData.photo);
+      
+      // Include latitude and longitude if available
+      if (formData.latitude !== null) {
+        formDataToSend.append('latitude', formData.latitude);
+      }
+      if (formData.longitude !== null) {
+        formDataToSend.append('longitude', formData.longitude);
+      }
 
       const response = await reportsAPI.create(formDataToSend);
       
@@ -328,9 +370,9 @@ const Home = () => {
             </div>
             <div className="text-center lg:text-left">
               <h3 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-2">
-                <CountUp end={stats.volunteers} duration={2000} />
+                <CountUp end={stats.petugas} duration={2000} />
               </h3>
-              <p className="text-gray-600 text-sm sm:text-base lg:text-lg">Relawan Aktif</p>
+              <p className="text-gray-600 text-sm sm:text-base lg:text-lg">Petugas Aktif</p>
             </div>
           </div>
         </div>
@@ -565,7 +607,7 @@ const Home = () => {
               </summary>
               <div className="px-4 sm:px-6 pb-4 sm:pb-5">
                 <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
-                  Ya, Anda dapat melihat status laporan di halaman "Laporan". Status akan diperbarui secara real-time mulai dari pending, disetujui, ditugaskan, dalam proses, hingga selesai.
+                  Saat ini Anda dapat melihat status laporan melalui halaman Laporan di website kami. Di masa mendatang, kami akan menambahkan fitur pelacakan dengan notifikasi via email atau WhatsApp.
                 </p>
               </div>
             </details>
@@ -602,15 +644,15 @@ const Home = () => {
 
             {/* Form */}
             <form className="space-y-4 sm:space-y-6" onSubmit={handleSubmit}>
-              {/* Judul Laporan */}
+              {/* Judul */}
               <div>
-                <label className="block text-gray-900 font-semibold mb-2 text-sm sm:text-base">Judul Laporan</label>
+                <label className="block text-gray-900 font-semibold mb-2 text-sm sm:text-base">Judul Laporan *</label>
                 <input
                   type="text"
                   name="title"
                   value={formData.title}
                   onChange={handleInputChange}
-                  placeholder="Masukkan judul laporan"
+                  placeholder="Contoh: Sampah Menumpuk di Jalan..."
                   className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   required
                 />
@@ -618,44 +660,47 @@ const Home = () => {
 
               {/* Lokasi */}
               <div>
-                <label className="block text-gray-900 font-semibold mb-2 text-sm sm:text-base">Lokasi</label>
-                <div className="flex flex-col sm:flex-row gap-2">
+                <label className="block text-gray-900 font-semibold mb-2 text-sm sm:text-base">Lokasi *</label>
+                <div className="flex gap-2">
                   <input
                     type="text"
                     name="location"
                     value={formData.location}
                     onChange={handleInputChange}
-                    placeholder="Klik tombol untuk ambil lokasi"
+                    placeholder="Contoh: Jl. Sudirman No. 123"
                     className="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    readOnly
                     required
                   />
                   <button
                     type="button"
                     onClick={handleGetLocation}
                     disabled={loadingLocation}
-                    className="px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed whitespace-nowrap"
+                    className="px-3 sm:px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white font-medium rounded-xl transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed whitespace-nowrap flex items-center gap-1 sm:gap-2 text-sm sm:text-base"
                   >
                     {loadingLocation ? (
-                      <svg className="animate-spin h-5 w-5 mx-auto" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
+                      <>
+                        <svg className="animate-spin h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span className="hidden sm:inline">Loading...</span>
+                      </>
                     ) : (
-                      <>📍 Ambil Lokasi</>
+                      <>
+                        📍
+                        <span className="hidden sm:inline">Ambil Lokasi</span>
+                      </>
                     )}
                   </button>
                 </div>
-                {formData.latitude && formData.longitude && (
-                  <p className="mt-1 text-xs text-gray-500">
-                    Koordinat: {formData.latitude.toFixed(6)}, {formData.longitude.toFixed(6)}
-                  </p>
-                )}
+                <p className="text-xs text-gray-500 mt-1">
+                  Klik tombol untuk menggunakan lokasi GPS Anda
+                </p>
               </div>
 
               {/* Deskripsi Laporan */}
               <div>
-                <label className="block text-gray-900 font-semibold mb-2 text-sm sm:text-base">Deskripsi Laporan</label>
+                <label className="block text-gray-900 font-semibold mb-2 text-sm sm:text-base">Deskripsi Laporan *</label>
                 <textarea
                   name="description"
                   value={formData.description}
@@ -663,6 +708,7 @@ const Home = () => {
                   placeholder="Jelaskan kondisi sampah liar yang anda temukan"
                   rows="5"
                   className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
+                  required
                 />
               </div>
 

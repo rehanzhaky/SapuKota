@@ -35,6 +35,18 @@ const User = sequelize.define('User', {
   status: {
     type: DataTypes.ENUM('active', 'inactive'),
     defaultValue: 'active'
+  },
+  current_latitude: {
+    type: DataTypes.DECIMAL(10, 8),
+    allowNull: true
+  },
+  current_longitude: {
+    type: DataTypes.DECIMAL(11, 8),
+    allowNull: true
+  },
+  last_location_update: {
+    type: DataTypes.DATE,
+    allowNull: true
   }
 }, {
   tableName: 'users',

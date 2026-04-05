@@ -43,16 +43,15 @@ const HomeShadcn = () => {
   };
 
   const getStatusBadge = (status) => {
-    const variants = {
-      pending: { variant: 'warning', label: 'Menunggu' },
-      approved: { variant: 'info', label: 'Disetujui' },
-      assigned: { variant: 'default', label: 'Ditugaskan' },
-      in_progress: { variant: 'secondary', label: 'Dalam Proses' },
-      completed: { variant: 'success', label: 'Selesai' },
-      rejected: { variant: 'destructive', label: 'Ditolak' }
-    };
-    const config = variants[status] || variants.pending;
-    return <Badge variant={config.variant}>{config.label}</Badge>;
+    // Public view: Diproses, Selesai, Ditolak
+    if (status === 'completed') {
+      return <Badge variant="success">Selesai</Badge>;
+    }
+    if (status === 'rejected') {
+      return <Badge variant="destructive">Ditolak</Badge>;
+    }
+    // pending, approved, assigned, in_progress = Diproses
+    return <Badge variant="default">Diproses</Badge>;
   };
 
   return (

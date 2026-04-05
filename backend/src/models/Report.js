@@ -58,6 +58,38 @@ const Report = sequelize.define('Report', {
   completion_notes: {
     type: DataTypes.TEXT,
     allowNull: true
+  },
+  accepted_at: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  accept_latitude: {
+    type: DataTypes.DECIMAL(10, 8),
+    allowNull: true
+  },
+  accept_longitude: {
+    type: DataTypes.DECIMAL(11, 8),
+    allowNull: true
+  },
+  arrived_at: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  petugas_latitude: {
+    type: DataTypes.DECIMAL(10, 8),
+    allowNull: true
+  },
+  petugas_longitude: {
+    type: DataTypes.DECIMAL(11, 8),
+    allowNull: true
+  },
+  complete_latitude: {
+    type: DataTypes.DECIMAL(10, 8),
+    allowNull: true
+  },
+  complete_longitude: {
+    type: DataTypes.DECIMAL(11, 8),
+    allowNull: true
   }
 }, {
   tableName: 'reports',

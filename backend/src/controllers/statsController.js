@@ -14,17 +14,36 @@ exports.getStats = async (req, res) => {
         'status',
         [sequelize.fn('COUNT', sequelize.col('id')), 'count']
       ],
-      group: ['status']
+      group: ['status'],
+      raw: true
     });
 
-    // Reports by category
-    const reportsByCategory = await Report.findAll({
-      attributes: [
-        'category',
-        [sequelize.fn('COUNT', sequelize.col('id')), 'count']
-      ],
-      group: ['category']
+    // Reports by assigned petugas - using raw query for better GROUP BY handling
+    const reportsByPetugasRaw = await sequelize.query(`
+      SELECT 
+        r.assigned_to,
+        COUNT(r.id) as count,
+        u.id as petugas_id,
+        u.name as petugas_name
+      FROM reports r
+      LEFT JOIN users u ON r.assigned_to = u.id
+      WHERE r.assigned_to IS NOT NULL
+      GROUP BY r.assigned_to, u.id, u.name
+      ORDER BY count DESC
+    `, { 
+      type: sequelize.QueryTypes.SELECT 
     });
+
+    // Format reportsByPetugas
+    const reportsByPetugas = reportsByPetugasRaw.map(item => ({
+      assigned_to: item.assigned_to,
+      count: parseInt(item.count),
+      assignedPetugas: {
+        id: item.petugas_id,
+        name: item.petugas_name,
+        full_name: item.petugas_name // Use name as full_name for compatibility
+      }
+    }));
 
     // Total petugas
     const totalPetugas = await User.count({
@@ -52,13 +71,18 @@ exports.getStats = async (req, res) => {
 
     // In progress reports
     const inProgressReports = await Report.count({
-      where: { status: ['assigned', 'in_progress'] }
+      where: { 
+        status: {
+          [Op.in]: ['assigned', 'in_progress']
+        }
+      }
     });
 
     res.json({
       totalReports,
       reportsByStatus,
-      reportsByCategory,
+      reportsByCategory: [], // Empty array since we don't have category field
+      reportsByPetugas,
       totalPetugas,
       completedThisMonth,
       pendingReports,
@@ -66,7 +90,12 @@ exports.getStats = async (req, res) => {
     });
   } catch (error) {
     console.error('Get stats error:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ 
+      message: 'Server error', 
+      error: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 };
 

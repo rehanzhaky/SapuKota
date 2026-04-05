@@ -1,12 +1,17 @@
+import sapuLogo from '../assets/sapu.png';
+
 const Footer = () => {
   return (
     <footer className="bg-gray-800 text-white mt-auto">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
           <div>
-            <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 bg-gradient-to-r from-primary-400 to-secondary-400 bg-clip-text text-transparent">
-              SapuKota.id
-            </h3>
+            <div className="flex items-center space-x-2 mb-3 sm:mb-4">
+              <img src={sapuLogo} alt="SapuKota Logo" className="h-8 w-auto" />
+              <h3 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-primary-400 to-secondary-400 bg-clip-text text-transparent">
+                SapuKota.id
+              </h3>
+            </div>
             <p className="text-gray-300 text-xs sm:text-sm">
               Sistem pelaporan sampah liar untuk kota yang lebih bersih dan sehat.
             </p>

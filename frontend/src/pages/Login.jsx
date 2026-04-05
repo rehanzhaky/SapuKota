@@ -1,4 +1,55 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+
 const Login = () => {
+  const navigate = useNavigate();
+  const { login } = useAuth();
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+    setError(''); // Clear error when user types
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    try {
+      const result = await login(formData);
+      
+      if (result.success) {
+        // Get user from localStorage after successful login
+        const user = JSON.parse(localStorage.getItem('user'));
+        
+        // Redirect based on role
+        if (user.role === 'admin_dlh') {
+          navigate('/admin/dashboard');
+        } else if (user.role === 'petugas') {
+          navigate('/petugas/dashboard');
+        } else {
+          navigate('/');
+        }
+      } else {
+        setError(result.message || 'Login gagal. Silakan coba lagi.');
+      }
+    } catch (err) {
+      setError('Terjadi kesalahan. Silakan coba lagi.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center py-6 sm:py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full">
@@ -13,27 +64,71 @@ const Login = () => {
         </div>
 
         <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8">
-          <div className="text-center py-6 sm:py-8">
-            <div className="mb-4 sm:mb-6">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto bg-green-100 rounded-full flex items-center justify-center">
-                <svg className="w-8 h-8 sm:w-10 sm:h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                {error}
               </div>
+            )}
+
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                Email
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                required
+                value={formData.email}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all outline-none"
+                placeholder="admin@sapukota.id"
+                disabled={loading}
+              />
             </div>
-            <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-3">
-              Halaman Login
-            </h3>
-            <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6 px-2">
-              Fitur login untuk admin dan petugas
-            </p>
-            <div className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 bg-yellow-50 border-2 border-yellow-200 rounded-full">
-              <svg className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span className="text-yellow-800 font-medium text-sm sm:text-base">Sedang Dalam Pengembangan</span>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                Password
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                value={formData.password}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all outline-none"
+                placeholder="••••••••"
+                disabled={loading}
+              />
             </div>
-          </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold py-3 px-4 rounded-lg hover:from-green-600 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <span className="flex items-center justify-center">
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Memproses...
+                </span>
+              ) : (
+                'Login'
+              )}
+            </button>
+
+            <div className="text-center pt-4">
+              <p className="text-sm text-gray-600">
+                Default: <span className="font-semibold">admin@sapukota.id</span> / <span className="font-semibold">admin123</span>
+              </p>
+            </div>
+          </form>
         </div>
       </div>
     </div>

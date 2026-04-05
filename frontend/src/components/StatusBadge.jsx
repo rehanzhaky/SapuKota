@@ -1,14 +1,36 @@
-const StatusBadge = ({ status }) => {
-  const statusConfig = {
-    pending: { label: 'Menunggu', color: 'bg-yellow-100 text-yellow-800' },
-    approved: { label: 'Disetujui', color: 'bg-blue-100 text-blue-800' },
-    assigned: { label: 'Ditugaskan', color: 'bg-purple-100 text-purple-800' },
-    in_progress: { label: 'Dalam Proses', color: 'bg-orange-100 text-orange-800' },
-    completed: { label: 'Selesai', color: 'bg-green-100 text-green-800' },
-    rejected: { label: 'Ditolak', color: 'bg-red-100 text-red-800' }
+const StatusBadge = ({ status, context = 'public' }) => {
+  // Status mapping berdasarkan context
+  const getStatusConfig = () => {
+    if (context === 'admin') {
+      // Admin: hanya 2 status (Diproses, Ditolak)
+      if (status === 'rejected') {
+        return { label: 'Ditolak', color: 'bg-red-100 text-red-800' };
+      }
+      // pending, approved, assigned, in_progress, completed = Diproses
+      return { label: 'Diproses', color: 'bg-blue-100 text-blue-800' };
+    }
+    
+    if (context === 'petugas') {
+      // Petugas: 2 status (Diproses, Selesai)
+      if (status === 'completed') {
+        return { label: 'Selesai', color: 'bg-green-100 text-green-800' };
+      }
+      // assigned, in_progress = Diproses
+      return { label: 'Diproses', color: 'bg-blue-100 text-blue-800' };
+    }
+    
+    // Public: 3 status (Diproses, Selesai, Ditolak)
+    if (status === 'completed') {
+      return { label: 'Selesai', color: 'bg-green-100 text-green-800' };
+    }
+    if (status === 'rejected') {
+      return { label: 'Ditolak', color: 'bg-red-100 text-red-800' };
+    }
+    // pending, approved, assigned, in_progress = Diproses
+    return { label: 'Diproses', color: 'bg-blue-100 text-blue-800' };
   };
 
-  const config = statusConfig[status] || statusConfig.pending;
+  const config = getStatusConfig();
 
   return (
     <span className={`px-3 py-1 rounded-full text-xs font-semibold ${config.color}`}>

@@ -1,5 +1,22 @@
 const { User, Report } = require('../models');
 
+// Public - Get petugas count
+exports.getPetugasCount = async (req, res) => {
+  try {
+    const count = await User.count({
+      where: { 
+        role: 'petugas',
+        status: 'active'
+      }
+    });
+
+    res.json({ count });
+  } catch (error) {
+    console.error('Get petugas count error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 // Admin DLH - Get all petugas
 exports.getAllPetugas = async (req, res) => {
   try {
@@ -127,9 +144,58 @@ exports.getMyTasks = async (req, res) => {
       order: [['createdAt', 'DESC']]
     });
 
-    res.json(tasks);
+    res.json({ data: tasks });
   } catch (error) {
     console.error('Get tasks error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Petugas - Update GPS location
+exports.updateGPSLocation = async (req, res) => {
+  try {
+    const { latitude, longitude } = req.body;
+
+    if (!latitude || !longitude) {
+      return res.status(400).json({ message: 'Latitude and longitude are required' });
+    }
+
+    await User.update(
+      {
+        current_latitude: latitude,
+        current_longitude: longitude,
+        last_location_update: new Date()
+      },
+      {
+        where: { id: req.user.id }
+      }
+    );
+
+    res.json({ message: 'GPS location updated successfully' });
+  } catch (error) {
+    console.error('Update GPS location error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Admin - Get all petugas with GPS locations
+exports.getPetugasLocations = async (req, res) => {
+  try {
+    const petugas = await User.findAll({
+      where: { role: 'petugas', status: 'active' },
+      attributes: ['id', 'name', 'phone', 'current_latitude', 'current_longitude', 'last_location_update'],
+      include: [{
+        model: Report,
+        as: 'assignedReports',
+        where: { status: ['assigned', 'in_progress'] },
+        required: false,
+        attributes: ['id', 'title', 'location', 'latitude', 'longitude', 'status']
+      }]
+    });
+
+    res.json({ data: petugas });
+  } catch (error) {
+    console.error('Get petugas locations error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };

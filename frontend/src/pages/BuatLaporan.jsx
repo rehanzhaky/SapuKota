@@ -5,64 +5,135 @@ import { reportsAPI } from '../services/api';
 const BuatLaporan = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [loadingLocation, setLoadingLocation] = useState(false);
+  const [error, setError] = useState('');
   const [formData, setFormData] = useState({
-    reporter_name: '',
-    reporter_phone: '',
-    reporter_email: '',
+    title: '',
     location: '',
-    latitude: '',
-    longitude: '',
+    latitude: null,
+    longitude: null,
     description: '',
-    category: 'sampah_rumah_tangga',
     photo: null
   });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    setError(''); // Clear error when user types
   };
 
   const handleFileChange = (e) => {
-    setFormData(prev => ({ ...prev, photo: e.target.files[0] }));
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file size (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('Ukuran file maksimal 5MB');
+        e.target.value = '';
+        return;
+      }
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+      if (!allowedTypes.includes(file.type)) {
+        setError('Format file harus JPG, JPEG, atau PNG');
+        e.target.value = '';
+        return;
+      }
+      setFormData(prev => ({ ...prev, photo: file }));
+      setError('');
+    }
   };
 
   const handleGetLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setFormData(prev => ({
-            ...prev,
-            latitude: position.coords.latitude.toString(),
-            longitude: position.coords.longitude.toString()
-          }));
-          alert('Lokasi berhasil didapatkan!');
-        },
-        (error) => {
-          alert('Gagal mendapatkan lokasi: ' + error.message);
-        }
-      );
-    } else {
-      alert('Browser Anda tidak mendukung geolocation');
+    if (!navigator.geolocation) {
+      setError('Browser Anda tidak mendukung geolocation');
+      return;
     }
+
+    setLoadingLocation(true);
+    setError('');
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        const locationText = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+        
+        // Save coordinates
+        setFormData(prev => ({
+          ...prev,
+          location: locationText,
+          latitude: latitude,
+          longitude: longitude
+        }));
+        setLoadingLocation(false);
+        
+        // Optional: Try to get address from coordinates using reverse geocoding
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`)
+          .then(res => res.json())
+          .then(data => {
+            if (data.display_name) {
+              setFormData(prev => ({
+                ...prev,
+                location: data.display_name,
+                latitude: latitude,
+                longitude: longitude
+              }));
+            }
+          })
+          .catch(err => {
+            console.log('Reverse geocoding failed, using coordinates');
+          });
+      },
+      (error) => {
+        console.error('Geolocation error:', error);
+        let errorMessage = 'Gagal mendapatkan lokasi. ';
+        
+        switch(error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage += 'Anda menolak akses lokasi. Silakan izinkan akses lokasi di browser Anda.';
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage += 'Informasi lokasi tidak tersedia.';
+            break;
+          case error.TIMEOUT:
+            errorMessage += 'Request timeout. Silakan coba lagi.';
+            break;
+          default:
+            errorMessage += 'Terjadi kesalahan yang tidak diketahui.';
+        }
+        
+        setError(errorMessage);
+        setLoadingLocation(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      }
+    );
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
 
     try {
       const data = new FormData();
       Object.keys(formData).forEach(key => {
-        if (formData[key]) {
+        if (formData[key] !== null && formData[key] !== '') {
           data.append(key, formData[key]);
         }
       });
 
-      await reportsAPI.create(data);
-      alert('Laporan berhasil dibuat! Terima kasih atas partisipasi Anda.');
+      const response = await reportsAPI.create(data);
+      alert('✅ Laporan berhasil dibuat! Terima kasih atas partisipasi Anda.');
       navigate('/laporan');
     } catch (error) {
-      alert('Gagal membuat laporan: ' + (error.response?.data?.message || error.message));
+      console.error('Submit error:', error);
+      const errorMessage = error.response?.data?.message 
+        || error.response?.data?.error 
+        || 'Gagal mengirim laporan';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -78,53 +149,52 @@ const BuatLaporan = () => {
           </p>
 
           <form onSubmit={handleSubmit} className="card space-y-6">
+            {/* Error Alert */}
+            {error && (
+              <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm text-red-700">{error}</p>
+                  </div>
+                  <div className="ml-auto pl-3">
+                    <button
+                      type="button"
+                      onClick={() => setError('')}
+                      className="inline-flex text-red-400 hover:text-red-600"
+                    >
+                      <span className="sr-only">Dismiss</span>
+                      <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Nama Lengkap <span className="text-red-500">*</span>
+                Judul Laporan <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
-                name="reporter_name"
+                name="title"
                 required
                 className="input-field"
-                value={formData.reporter_name}
+                value={formData.title}
                 onChange={handleChange}
-                placeholder="Masukkan nama lengkap Anda"
+                placeholder="Contoh: Sampah Menumpuk di Jalan Sudirman"
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Nomor Telepon <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="tel"
-                name="reporter_phone"
-                required
-                className="input-field"
-                value={formData.reporter_phone}
-                onChange={handleChange}
-                placeholder="08xxxxxxxxxx"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email (Opsional)
-              </label>
-              <input
-                type="email"
-                name="reporter_email"
-                className="input-field"
-                value={formData.reporter_email}
-                onChange={handleChange}
-                placeholder="email@example.com"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Lokasi Sampah <span className="text-red-500">*</span>
+                Lokasi <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -139,64 +209,12 @@ const BuatLaporan = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Koordinat GPS (Opsional)
-              </label>
-              <div className="flex space-x-2">
-                <input
-                  type="text"
-                  name="latitude"
-                  className="input-field"
-                  value={formData.latitude}
-                  onChange={handleChange}
-                  placeholder="Latitude"
-                  readOnly
-                />
-                <input
-                  type="text"
-                  name="longitude"
-                  className="input-field"
-                  value={formData.longitude}
-                  onChange={handleChange}
-                  placeholder="Longitude"
-                  readOnly
-                />
-                <button
-                  type="button"
-                  onClick={handleGetLocation}
-                  className="btn-secondary whitespace-nowrap"
-                >
-                  📍 Ambil Lokasi
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Kategori Sampah <span className="text-red-500">*</span>
-              </label>
-              <select
-                name="category"
-                required
-                className="input-field"
-                value={formData.category}
-                onChange={handleChange}
-              >
-                <option value="sampah_rumah_tangga">Sampah Rumah Tangga</option>
-                <option value="sampah_industri">Sampah Industri</option>
-                <option value="sampah_elektronik">Sampah Elektronik</option>
-                <option value="sampah_bangunan">Sampah Bangunan</option>
-                <option value="lainnya">Lainnya</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Deskripsi <span className="text-red-500">*</span>
+                Deskripsi Laporan <span className="text-red-500">*</span>
               </label>
               <textarea
                 name="description"
                 required
-                rows="4"
+                rows="5"
                 className="input-field"
                 value={formData.description}
                 onChange={handleChange}
@@ -206,17 +224,36 @@ const BuatLaporan = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Foto Sampah (Opsional)
+                Upload Foto <span className="text-red-500">*</span>
               </label>
-              <input
-                type="file"
-                accept="image/jpeg,image/jpg,image/png"
-                onChange={handleFileChange}
-                className="input-field"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Format: JPG, JPEG, PNG. Maksimal 5MB
-              </p>
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary-500 transition-colors">
+                <input
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png"
+                  onChange={handleFileChange}
+                  className="hidden"
+                  id="photo-upload"
+                  required
+                />
+                <label htmlFor="photo-upload" className="cursor-pointer">
+                  <div className="flex flex-col items-center">
+                    <svg className="w-12 h-12 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                    <p className="text-sm text-gray-600">
+                      Klik untuk upload atau drag & drop
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      JPG, JPEG, PNG (Max. 5MB)
+                    </p>
+                  </div>
+                  {formData.photo && (
+                    <p className="mt-3 text-sm font-medium text-primary-600">
+                      ✓ {formData.photo.name}
+                    </p>
+                  )}
+                </label>
+              </div>
             </div>
 
             <div className="flex space-x-4">

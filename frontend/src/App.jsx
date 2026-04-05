@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ProtectedRoute from './components/ProtectedRoute';
+import AdminLayoutShadcn from './components/AdminLayoutShadcn';
 
 // Public Pages
 import Home from './pages/Home';
@@ -18,74 +19,107 @@ import KelolaPetugas from './pages/admin/KelolaPetugas';
 // Petugas Pages
 import DashboardPetugas from './pages/petugas/DashboardPetugas';
 
-function DashboardRouter() {
-  const { user } = useAuth();
-
-  if (user?.role === 'admin_dlh') {
-    return <DashboardDLH />;
-  } else if (user?.role === 'petugas') {
-    return <DashboardPetugas />;
-  }
-
-  return <Navigate to="/" replace />;
-}
-
 function App() {
   return (
     <AuthProvider>
       <Router>
-        <div className="flex flex-col min-h-screen">
-          <Navbar />
-          <main className="flex-grow">
-            <Routes>
-              {/* Public Routes */}
-              <Route path="/" element={<Home />} />
-              <Route path="/laporan" element={<Laporan />} />
-              <Route path="/buat-laporan" element={<BuatLaporan />} />
-              <Route path="/login" element={<Login />} />
+        <Routes>
+          {/* Public Routes with Navbar and Footer */}
+          <Route path="/" element={
+            <div className="flex flex-col min-h-screen">
+              <Navbar />
+              <main className="flex-grow">
+                <Home />
+              </main>
+              <Footer />
+            </div>
+          } />
+          
+          <Route path="/laporan" element={
+            <div className="flex flex-col min-h-screen">
+              <Navbar />
+              <main className="flex-grow">
+                <Laporan />
+              </main>
+              <Footer />
+            </div>
+          } />
+          
+          <Route path="/buat-laporan" element={
+            <div className="flex flex-col min-h-screen">
+              <Navbar />
+              <main className="flex-grow">
+                <BuatLaporan />
+              </main>
+              <Footer />
+            </div>
+          } />
+          
+          <Route path="/login" element={<Login />} />
 
-              {/* Protected Routes - Dashboard */}
-              <Route
-                path="/dashboard"
-                element={
-                  <ProtectedRoute allowedRoles={['admin_dlh', 'petugas']}>
-                    <DashboardRouter />
-                  </ProtectedRoute>
-                }
-              />
+          {/* Admin Routes with AdminLayoutShadcn */}
+          <Route
+            path="/admin/dashboard"
+            element={
+              <ProtectedRoute allowedRoles={['admin_dlh']}>
+                <AdminLayoutShadcn>
+                  <DashboardDLH />
+                </AdminLayoutShadcn>
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/admin/laporan"
+            element={
+              <ProtectedRoute allowedRoles={['admin_dlh']}>
+                <AdminLayoutShadcn>
+                  <KelolaLaporan />
+                </AdminLayoutShadcn>
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/admin/petugas"
+            element={
+              <ProtectedRoute allowedRoles={['admin_dlh']}>
+                <AdminLayoutShadcn>
+                  <KelolaPetugas />
+                </AdminLayoutShadcn>
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/admin/statistik"
+            element={
+              <ProtectedRoute allowedRoles={['admin_dlh']}>
+                <AdminLayoutShadcn>
+                  <DashboardDLH />
+                </AdminLayoutShadcn>
+              </ProtectedRoute>
+            }
+          />
 
-              {/* Protected Routes - Admin DLH Only */}
-              <Route
-                path="/dashboard/laporan"
-                element={
-                  <ProtectedRoute allowedRoles={['admin_dlh']}>
-                    <KelolaLaporan />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/dashboard/petugas"
-                element={
-                  <ProtectedRoute allowedRoles={['admin_dlh']}>
-                    <KelolaPetugas />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/dashboard/statistik"
-                element={
-                  <ProtectedRoute allowedRoles={['admin_dlh']}>
-                    <DashboardDLH />
-                  </ProtectedRoute>
-                }
-              />
+          {/* Petugas Routes */}
+          <Route
+            path="/petugas/dashboard"
+            element={
+              <ProtectedRoute allowedRoles={['petugas']}>
+                <AdminLayoutShadcn>
+                  <DashboardPetugas />
+                </AdminLayoutShadcn>
+              </ProtectedRoute>
+            }
+          />
 
-              {/* 404 */}
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </main>
-          <Footer />
-        </div>
+          {/* Legacy /dashboard route - redirect based on role */}
+          <Route path="/dashboard" element={<Navigate to="/admin/dashboard" replace />} />
+
+          {/* 404 */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
       </Router>
     </AuthProvider>
   );

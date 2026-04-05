@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_URL = '/api';
+// Use environment variable for production, fallback to proxy for development
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -46,6 +47,7 @@ export const reportsAPI = {
   getRecent: () => api.get('/reports/recent'),
   getById: (id) => api.get(`/reports/${id}`),
   updateStatus: (id, data) => api.put(`/reports/${id}/status`, data),
+  acceptTask: (id, data) => api.post(`/reports/${id}/accept`, data),
   updateProgress: (id, formData) => {
     const token = localStorage.getItem('token');
     return axios.put(`${API_URL}/reports/${id}/progress`, formData, {
@@ -54,16 +56,20 @@ export const reportsAPI = {
         'Authorization': `Bearer ${token}`
       }
     });
-  }
+  },
+  checkIn: (id, data) => api.post(`/reports/${id}/checkin`, data)
 };
 
 // Users API
 export const usersAPI = {
+  getPetugasCount: () => api.get('/users/petugas/count'),
   getAllPetugas: () => api.get('/users/petugas'),
+  getPetugasLocations: () => api.get('/users/petugas/locations'),
   createPetugas: (data) => api.post('/users/petugas', data),
   updatePetugas: (id, data) => api.put(`/users/petugas/${id}`, data),
   deletePetugas: (id) => api.delete(`/users/petugas/${id}`),
-  getMyTasks: (params) => api.get('/users/tasks', { params })
+  getMyTasks: (params) => api.get('/users/tasks', { params }),
+  updateGPSLocation: (data) => api.post('/users/gps/update', data)
 };
 
 // Stats API

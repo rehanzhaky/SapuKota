@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { reportsAPI, usersAPI } from '../../services/api';
 import StatusBadge from '../../components/StatusBadge';
+import { findNearestTPS, formatDistance, getPriority } from '../../utils/distance';
 
 const KelolaLaporan = () => {
   const [reports, setReports] = useState([]);
@@ -8,6 +9,8 @@ const KelolaLaporan = () => {
   const [loading, setLoading] = useState(true);
   const [selectedReport, setSelectedReport] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [filterStatus, setFilterStatus] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [formData, setFormData] = useState({
     status: '',
     assigned_to: '',
@@ -16,18 +19,25 @@ const KelolaLaporan = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [filterStatus, searchQuery]);
 
   const fetchData = async () => {
     try {
+      setLoading(true);
+      const params = {};
+      if (filterStatus) params.status = filterStatus;
+      if (searchQuery) params.search = searchQuery;
+      params.limit = 100;
+
       const [reportsRes, petugasRes] = await Promise.all([
-        reportsAPI.getAll({ limit: 100 }),
+        reportsAPI.getAll(params),
         usersAPI.getAllPetugas()
       ]);
-      setReports(reportsRes.data.reports);
-      setPetugas(petugasRes.data);
+      setReports(reportsRes.data.reports || []);
+      setPetugas(petugasRes.data || []);
     } catch (error) {
       console.error('Error fetching data:', error);
+      alert('Gagal memuat data: ' + (error.response?.data?.message || error.message));
     } finally {
       setLoading(false);
     }
@@ -70,15 +80,40 @@ const KelolaLaporan = () => {
     });
   };
 
-  const getCategoryLabel = (category) => {
-    const labels = {
-      sampah_rumah_tangga: 'Sampah Rumah Tangga',
-      sampah_industri: 'Sampah Industri',
-      sampah_elektronik: 'Sampah Elektronik',
-      sampah_bangunan: 'Sampah Bangunan',
-      lainnya: 'Lainnya'
+  const getStatusLabel = (status) => {
+    // Admin view: simplified status labels
+    if (status === 'rejected') {
+      return 'Ditolak';
+    }
+    // All other statuses show as Diproses for admin
+    return 'Diproses';
+  };
+
+  const getReportPriorityData = (report) => {
+    if (!report.latitude || !report.longitude) {
+      return {
+        nearestTPS: null,
+        distance: null,
+        priority: null
+      };
+    }
+
+    const nearestTPS = findNearestTPS(report.latitude, report.longitude);
+    if (!nearestTPS) {
+      return {
+        nearestTPS: null,
+        distance: null,
+        priority: null
+      };
+    }
+
+    const priority = getPriority(nearestTPS.distance);
+    
+    return {
+      nearestTPS,
+      distance: nearestTPS.distance,
+      priority
     };
-    return labels[category] || category;
   };
 
   if (loading) {
@@ -90,18 +125,55 @@ const KelolaLaporan = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4">
-        <h1 className="text-4xl font-bold text-gray-800 mb-8">Kelola Laporan</h1>
+    <div>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-4xl font-bold text-gray-900">Kelola Laporan</h1>
+        <div className="text-lg font-semibold text-gray-600">
+          Total: {reports.length} laporan
+        </div>
+      </div>
 
-        <div className="card overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b">
-                <th className="text-left py-3 px-4">ID</th>
-                <th className="text-left py-3 px-4">Pelapor</th>
+      {/* Filters */}
+      <div className="bg-white rounded-2xl shadow-md p-6 mb-6 border border-gray-200">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Cari Laporan
+            </label>
+            <input
+              type="text"
+              placeholder="Cari judul, lokasi, atau deskripsi..."
+              className="input-field"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Filter Status
+            </label>
+            <select
+              className="input-field"
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+            >
+              <option value="">Semua Status</option>
+              <option value="pending,approved,assigned,in_progress,completed">Diproses</option>
+              <option value="rejected">Ditolak</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-2xl shadow-md overflow-x-auto border border-gray-200">
+        <table className="w-full">
+          <thead>
+            <tr className="border-b">
+              <th className="text-left py-3 px-4">ID</th>
+                <th className="text-left py-3 px-4">Judul</th>
                 <th className="text-left py-3 px-4">Lokasi</th>
-                <th className="text-left py-3 px-4">Kategori</th>
+                <th className="text-left py-3 px-4">Jarak TPS</th>
+                <th className="text-left py-3 px-4">Prioritas</th>
                 <th className="text-left py-3 px-4">Status</th>
                 <th className="text-left py-3 px-4">Petugas</th>
                 <th className="text-left py-3 px-4">Tanggal</th>
@@ -109,44 +181,66 @@ const KelolaLaporan = () => {
               </tr>
             </thead>
             <tbody>
-              {reports.map((report) => (
-                <tr key={report.id} className="border-b hover:bg-gray-50">
-                  <td className="py-3 px-4">#{report.id}</td>
-                  <td className="py-3 px-4">
-                    <div>
-                      <p className="font-medium">{report.reporter_name}</p>
-                      <p className="text-sm text-gray-500">{report.reporter_phone}</p>
-                    </div>
-                  </td>
-                  <td className="py-3 px-4 max-w-xs">
-                    <p className="truncate">{report.location}</p>
-                  </td>
-                  <td className="py-3 px-4">
-                    <span className="text-sm">{getCategoryLabel(report.category)}</span>
-                  </td>
-                  <td className="py-3 px-4">
-                    <StatusBadge status={report.status} />
-                  </td>
-                  <td className="py-3 px-4">
-                    {report.assignedPetugas ? (
-                      <span className="text-sm">{report.assignedPetugas.name}</span>
-                    ) : (
-                      <span className="text-sm text-gray-400">Belum ditugaskan</span>
-                    )}
-                  </td>
-                  <td className="py-3 px-4 text-sm text-gray-600">
-                    {formatDate(report.createdAt)}
-                  </td>
-                  <td className="py-3 px-4">
-                    <button
-                      onClick={() => handleOpenModal(report)}
-                      className="text-primary-600 hover:text-primary-700 font-medium"
-                    >
-                      Kelola
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {reports.map((report) => {
+                const priorityData = getReportPriorityData(report);
+                return (
+                  <tr key={report.id} className="border-b hover:bg-gray-50">
+                    <td className="py-3 px-4">#{report.id}</td>
+                    <td className="py-3 px-4">
+                      <p className="font-medium">{report.title}</p>
+                    </td>
+                    <td className="py-3 px-4 max-w-xs">
+                      <p className="truncate">{report.location}</p>
+                    </td>
+                    <td className="py-3 px-4">
+                      {priorityData.nearestTPS ? (
+                        <div className="text-sm">
+                          <p className="font-medium">{formatDistance(priorityData.distance)}</p>
+                          <p className="text-xs text-gray-500">{priorityData.nearestTPS.name}</p>
+                        </div>
+                      ) : (
+                        <span className="text-sm text-gray-400">-</span>
+                      )}
+                    </td>
+                    <td className="py-3 px-4">
+                      {priorityData.priority ? (
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          priorityData.priority.level === 'high' 
+                            ? 'bg-red-100 text-red-700' 
+                            : priorityData.priority.level === 'medium'
+                            ? 'bg-yellow-100 text-yellow-700'
+                            : 'bg-green-100 text-green-700'
+                        }`}>
+                          {priorityData.priority.label}
+                        </span>
+                      ) : (
+                        <span className="text-sm text-gray-400">-</span>
+                      )}
+                    </td>
+                    <td className="py-3 px-4">
+                      <StatusBadge status={report.status} context="admin" />
+                    </td>
+                    <td className="py-3 px-4">
+                      {report.assignedPetugas ? (
+                        <span className="text-sm">{report.assignedPetugas.name}</span>
+                      ) : (
+                        <span className="text-sm text-gray-400">Belum ditugaskan</span>
+                      )}
+                    </td>
+                    <td className="py-3 px-4 text-sm text-gray-600">
+                      {formatDate(report.createdAt)}
+                    </td>
+                    <td className="py-3 px-4">
+                      <button
+                        onClick={() => handleOpenModal(report)}
+                        className="text-primary-600 hover:text-primary-700 font-medium"
+                      >
+                        Kelola
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
 
@@ -156,7 +250,6 @@ const KelolaLaporan = () => {
             </div>
           )}
         </div>
-      </div>
 
       {/* Modal */}
       {showModal && selectedReport && (
@@ -167,26 +260,69 @@ const KelolaLaporan = () => {
 
               {/* Report Details */}
               <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-                <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="grid grid-cols-1 gap-4 text-sm">
                   <div>
-                    <p className="text-gray-600">Pelapor</p>
-                    <p className="font-medium">{selectedReport.reporter_name}</p>
+                    <p className="text-gray-600">Judul Laporan</p>
+                    <p className="font-medium text-lg">{selectedReport.title}</p>
                   </div>
                   <div>
-                    <p className="text-gray-600">Telepon</p>
-                    <p className="font-medium">{selectedReport.reporter_phone}</p>
-                  </div>
-                  <div className="col-span-2">
                     <p className="text-gray-600">Lokasi</p>
                     <p className="font-medium">{selectedReport.location}</p>
+                    {selectedReport.latitude && selectedReport.longitude && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        Koordinat: {selectedReport.latitude}, {selectedReport.longitude}
+                      </p>
+                    )}
                   </div>
-                  <div className="col-span-2">
+                  
+                  {/* TPS Terdekat & Prioritas */}
+                  {(() => {
+                    const priorityData = getReportPriorityData(selectedReport);
+                    if (priorityData.nearestTPS) {
+                      return (
+                        <>
+                          <div className="col-span-1 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                            <p className="text-gray-600 font-medium mb-2">TPS Terdekat</p>
+                            <p className="font-medium text-blue-900">{priorityData.nearestTPS.name}</p>
+                            <p className="text-sm text-blue-700 mt-1">
+                              Jarak: <strong>{formatDistance(priorityData.distance)}</strong>
+                            </p>
+                            <p className="text-xs text-blue-600 mt-1">
+                              Truk: {priorityData.nearestTPS.truck}
+                            </p>
+                          </div>
+                          <div className="col-span-1">
+                            <p className="text-gray-600">Prioritas Pengangkutan</p>
+                            <div className="mt-1 flex items-center gap-2">
+                              <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                                priorityData.priority.level === 'high' 
+                                  ? 'bg-red-100 text-red-700' 
+                                  : priorityData.priority.level === 'medium'
+                                  ? 'bg-yellow-100 text-yellow-700'
+                                  : 'bg-green-100 text-green-700'
+                              }`}>
+                                {priorityData.priority.label}
+                              </span>
+                              <span className="text-sm text-gray-600">
+                                - {priorityData.priority.description}
+                              </span>
+                            </div>
+                          </div>
+                        </>
+                      );
+                    }
+                    return null;
+                  })()}
+
+                  <div>
                     <p className="text-gray-600">Deskripsi</p>
                     <p className="font-medium">{selectedReport.description}</p>
                   </div>
                   <div>
-                    <p className="text-gray-600">Kategori</p>
-                    <p className="font-medium">{getCategoryLabel(selectedReport.category)}</p>
+                    <p className="text-gray-600">Status Saat Ini</p>
+                    <div className="mt-1">
+                      <StatusBadge status={selectedReport.status} context="admin" />
+                    </div>
                   </div>
                   <div>
                     <p className="text-gray-600">Tanggal Laporan</p>
@@ -195,11 +331,14 @@ const KelolaLaporan = () => {
                 </div>
                 {selectedReport.photo && (
                   <div className="mt-4">
-                    <p className="text-gray-600 mb-2">Foto</p>
+                    <p className="text-gray-600 mb-2">Foto Laporan</p>
                     <img
-                      src={`/uploads/${selectedReport.photo}`}
+                      src={`http://localhost:5000/uploads/${selectedReport.photo}`}
                       alt="Laporan"
-                      className="w-full max-h-64 object-cover rounded-lg"
+                      className="w-full max-h-96 object-contain rounded-lg border"
+                      onError={(e) => {
+                        e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%23ddd" width="400" height="300"/%3E%3Ctext fill="%23999" x="50%25" y="50%25" text-anchor="middle" dominant-baseline="middle"%3EFoto tidak tersedia%3C/text%3E%3C/svg%3E';
+                      }}
                     />
                   </div>
                 )}
@@ -209,20 +348,22 @@ const KelolaLaporan = () => {
               <form onSubmit={handleUpdate} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Status
+                    Ubah Status <span className="text-red-500">*</span>
                   </label>
                   <select
                     className="input-field"
                     value={formData.status}
                     onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value }))}
+                    required
                   >
-                    <option value="pending">Menunggu</option>
-                    <option value="approved">Disetujui</option>
-                    <option value="assigned">Ditugaskan</option>
-                    <option value="in_progress">Dalam Proses</option>
-                    <option value="completed">Selesai</option>
-                    <option value="rejected">Ditolak</option>
+                    <option value="">Pilih Status</option>
+                    <option value="approved">Approve (Setujui Laporan)</option>
+                    <option value="assigned">Assign (Tugaskan ke Petugas)</option>
+                    <option value="rejected">Reject (Tolak Laporan)</option>
                   </select>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Status saat ini: <strong>{getStatusLabel(selectedReport.status)}</strong>
+                  </p>
                 </div>
 
                 <div>
@@ -234,13 +375,18 @@ const KelolaLaporan = () => {
                     value={formData.assigned_to}
                     onChange={(e) => setFormData(prev => ({ ...prev, assigned_to: e.target.value }))}
                   >
-                    <option value="">Pilih Petugas</option>
+                    <option value="">Belum ditugaskan</option>
                     {petugas.map((p) => (
                       <option key={p.id} value={p.id}>
-                        {p.name} - {p.phone}
+                        {p.name} ({p.email})
                       </option>
                     ))}
                   </select>
+                  {petugas.length === 0 && (
+                    <p className="text-xs text-amber-600 mt-1">
+                      Belum ada data petugas. Silakan tambahkan petugas terlebih dahulu di menu Kelola Petugas.
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -249,21 +395,21 @@ const KelolaLaporan = () => {
                   </label>
                   <textarea
                     className="input-field"
-                    rows="3"
+                    rows="4"
                     value={formData.admin_notes}
                     onChange={(e) => setFormData(prev => ({ ...prev, admin_notes: e.target.value }))}
-                    placeholder="Tambahkan catatan jika diperlukan"
+                    placeholder="Tambahkan catatan untuk laporan ini (opsional)"
                   />
                 </div>
 
-                <div className="flex space-x-3">
+                <div className="flex gap-3 pt-2">
                   <button type="submit" className="btn-primary flex-1">
-                    Simpan Perubahan
+                    💾 Simpan Perubahan
                   </button>
                   <button
                     type="button"
                     onClick={handleCloseModal}
-                    className="btn-outline"
+                    className="btn-outline px-6"
                   >
                     Batal
                   </button>
