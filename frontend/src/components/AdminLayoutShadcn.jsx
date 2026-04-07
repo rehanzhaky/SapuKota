@@ -11,9 +11,11 @@ import {
 } from "@/components/ui/breadcrumb"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { useLocation } from "react-router-dom"
+import { useAuth } from "@/context/AuthContext"
 
 export default function AdminLayoutShadcn({ children }) {
   const location = useLocation()
+  const { isPetugas } = useAuth()
   
   const getPageTitle = () => {
     const path = location.pathname
@@ -45,12 +47,16 @@ export default function AdminLayoutShadcn({ children }) {
             <Separator orientation="vertical" className="mr-2 h-4" />
             <Breadcrumb>
               <BreadcrumbList>
-                <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink asChild>
-                    <Link to="/">Beranda</Link>
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator className="hidden md:block" />
+                {!isPetugas && (
+                  <>
+                    <BreadcrumbItem className="hidden md:block">
+                      <BreadcrumbLink asChild>
+                        <Link to="/">Beranda</Link>
+                      </BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator className="hidden md:block" />
+                  </>
+                )}
                 <BreadcrumbItem>
                   <BreadcrumbPage className="font-semibold">{getPageTitle()}</BreadcrumbPage>
                 </BreadcrumbItem>

@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/sidebar"
 
 export function AppSidebar({ ...props }) {
-  const { user, logout } = useAuth()
+  const { user, logout, isPetugas } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
 
@@ -36,13 +36,21 @@ export function AppSidebar({ ...props }) {
     navigate('/')
   }
 
-  const data = {
-    user: {
-      name: user?.name || "Admin",
-      email: user?.email || "admin@sapukota.com",
-      avatar: null,
-    },
-    navMain: [
+  // Different navigation menus based on role
+  const getNavMain = () => {
+    if (isPetugas) {
+      return [
+        {
+          title: "Dashboard",
+          url: "/petugas/dashboard",
+          icon: LayoutDashboardIcon,
+          isActive: location.pathname === "/petugas/dashboard",
+        },
+      ]
+    }
+    
+    // Admin menu
+    return [
       {
         title: "Dashboard",
         url: "/admin/dashboard",
@@ -67,7 +75,16 @@ export function AppSidebar({ ...props }) {
         icon: BarChartIcon,
         isActive: location.pathname === "/admin/statistik",
       },
-    ],
+    ]
+  }
+
+  const data = {
+    user: {
+      name: user?.name || "User",
+      email: user?.email || "user@sapukota.com",
+      avatar: null,
+    },
+    navMain: getNavMain(),
   }
 
   return (
@@ -75,16 +92,28 @@ export function AppSidebar({ ...props }) {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <Link to="/">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <img src={sapuLogo} alt="SapuKota" className="size-6" />
+            <SidebarMenuButton size="lg" asChild={!isPetugas}>
+              {isPetugas ? (
+                <div className="flex items-center gap-2 cursor-default">
+                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                    <img src={sapuLogo} alt="SapuKota" className="size-6" />
+                  </div>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-semibold">SapuKota</span>
+                    <span className="truncate text-xs">Panel Petugas</span>
+                  </div>
                 </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">SapuKota</span>
-                  <span className="truncate text-xs">Admin Panel</span>
-                </div>
-              </Link>
+              ) : (
+                <Link to="/">
+                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                    <img src={sapuLogo} alt="SapuKota" className="size-6" />
+                  </div>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-semibold">SapuKota</span>
+                    <span className="truncate text-xs">Admin Panel</span>
+                  </div>
+                </Link>
+              )}
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
