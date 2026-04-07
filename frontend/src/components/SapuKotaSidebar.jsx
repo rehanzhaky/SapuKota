@@ -69,12 +69,6 @@ export function AppSidebar({ ...props }) {
         icon: UsersIcon,
         isActive: location.pathname === "/admin/petugas",
       },
-      {
-        title: "Statistik",
-        url: "/admin/statistik",
-        icon: BarChartIcon,
-        isActive: location.pathname === "/admin/statistik",
-      },
     ]
   }
 
