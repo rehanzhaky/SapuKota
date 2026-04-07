@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { reportsAPI, usersAPI } from '../services/api';
 import StatusBadge from '../components/StatusBadge';
 import CountUp from '../components/CountUp';
-import DomeGallery from '../components/DomeGallery';
 import heroImage from '../assets/Img.png';
 
 // Static data untuk tampilan sementara
@@ -47,38 +46,6 @@ const staticReports = [
     description: 'Ditemukan tumpukan sampah organik yang sudah membusuk',
     createdAt: new Date().toISOString(),
     status: 'completed'
-  }
-];
-
-// Gallery images data
-const galleryImages = [
-  {
-    src: 'https://plus.unsplash.com/premium_photo-1686836995135-f55914b7c1b6?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8c3VtbWVyJTIwdHJhc2h8ZW58MHx8MHx8fDA%3D',
-    alt: 'Abstract art'
-  },
-  {
-    src: 'https://plus.unsplash.com/premium_photo-1686836995359-25e4cda25dcb?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8c3VtbWVyJTIwdHJhc2h8ZW58MHx8MHx8fDA%3D',
-    alt: 'Modern sculpture'
-  },
-  {
-    src: 'https://images.unsplash.com/photo-1746226389907-ddfce048da9d?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8c3VtbWVyJTIwdHJhc2h8ZW58MHx8MHx8fDA%3D',
-    alt: 'Digital artwork'
-  },
-  {
-    src: 'https://images.unsplash.com/photo-1663217299294-27fd4ba85e4b?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fHN1bW1lciUyMHRyYXNofGVufDB8fDB8fHww',
-    alt: 'Contemporary art'
-  },
-  {
-    src: 'https://plus.unsplash.com/premium_photo-1664283229624-801dd08e8b64?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTd8fHN1bW1lciUyMHRyYXNofGVufDB8fDB8fHww',
-    alt: 'Geometric pattern'
-  },
-  {
-    src: 'https://images.unsplash.com/photo-1757827467414-35755ca350f8?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTl8fHN1bW1lciUyMHRyYXNofGVufDB8fDB8fHww',
-    alt: 'Textured surface'
-  },
-  { 
-    src: 'https://images.unsplash.com/photo-1622651463494-7afdc93f0c10?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fHN1bW1lciUyMHRyYXNofGVufDB8fDB8fHww', 
-    alt: 'Social media image' 
   }
 ];
 
@@ -321,9 +288,9 @@ const Home = () => {
 
             {/* Description */}
             <p className="text-gray-700 font-medium mb-6 sm:mb-8 max-w" style={{ fontSize: 'clamp(16px, 2.5vw, 24px)', lineHeight: '120%', letterSpacing: '-3%' }}>
-              Bantu menjaga kebersihan dengan melaporkan sampah liar di sekitar Anda.
+              Lingkungan bersih dimulai dari langkah kecil.
               <br />
-              Setiap laporan akan segera ditindaklanjuti untuk pembersihan dan pemeliharaan lingkungan
+              Laporkan sampah liar yang kamu temui, dan jadi bagian dari perubahan.
             </p>
 
             {/* CTA Button */}
@@ -450,29 +417,6 @@ const Home = () => {
               <div className="absolute bottom-0 left-0 right-0 h-20 sm:h-24 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Gallery Section */}
-      <section className="py-12 sm:py-16 bg-white">
-        <div className="text-center mb-8 sm:mb-12 px-4 sm:px-6">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 sm:mb-4">
-            Galeri Lingkungan
-          </h2>
-          <p className="text-gray-700 text-base sm:text-lg max-w-2xl mx-auto">
-            Kumpulan foto dokumentasi sampah liar dan upaya pembersihan lingkungan di berbagai lokasi
-          </p>
-        </div>
-        <div className="w-full h-[400px] sm:h-[500px] lg:h-[600px]">
-          <DomeGallery 
-            images={galleryImages}
-            fit={0.75}
-            minRadius={450}
-            maxVerticalRotationDeg={13}
-            segments={32}
-            dragDampening={4.2}
-            grayscale={false}
-          />
         </div>
       </section>
 
