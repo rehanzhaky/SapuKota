@@ -59,6 +59,31 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
+// Auto-create default admin user if not exists
+const createDefaultAdmin = async () => {
+  try {
+    const { User } = require('./models');
+    const existingAdmin = await User.findOne({
+      where: { email: 'admin@sapukota.id' }
+    });
+
+    if (!existingAdmin) {
+      await User.create({
+        name: 'Admin DLH',
+        email: 'admin@sapukota.id',
+        password: 'admin123',
+        role: 'admin_dlh',
+        phone: '081234567890',
+        status: 'active'
+      });
+      console.log('✅ Default admin created (admin@sapukota.id / admin123)');
+      console.log('⚠️  IMPORTANT: Change the password after first login!');
+    }
+  } catch (error) {
+    console.error('⚠️  Could not create default admin:', error.message);
+  }
+};
+
 // Database connection and server start
 const startServer = async () => {
   try {
@@ -68,6 +93,9 @@ const startServer = async () => {
     // Sync database (create tables if not exist, alter existing ones to match models)
     await sequelize.sync({ alter: true });
     console.log('✅ Database synchronized (auto-migration enabled)');
+
+    // Auto-create default admin if not exists
+    await createDefaultAdmin();
 
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
