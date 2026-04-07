@@ -5,10 +5,11 @@ import StatusBadge from '../components/StatusBadge';
 import Loading from '../components/Loading';
 import MapView from '../components/MapView';
 
+const API_URL = import.meta.env.VITE_API_URL || '/api';
+
 const Laporan = () => {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState('map'); // 'map' or 'list'
   const [filters, setFilters] = useState({
     status: '',
     search: '',
@@ -121,42 +122,10 @@ const Laporan = () => {
             </div>
           </div>
           
-          <div className="mt-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <div className="mt-3">
             <div className="text-sm text-gray-600">
               Menampilkan {reports.length} dari {pagination.totalReports} laporan
-              {viewMode === 'map' && (
-                <span className="ml-2 text-green-600 font-medium">• Live Update</span>
-              )}
-            </div>
-            
-            {/* View Toggle */}
-            <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
-              <button
-                onClick={() => setViewMode('map')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
-                  viewMode === 'map'
-                    ? 'bg-white text-green-600 shadow-sm font-semibold'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                </svg>
-                Peta
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
-                  viewMode === 'list'
-                    ? 'bg-white text-green-600 shadow-sm font-semibold'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                </svg>
-                Daftar
-              </button>
+              <span className="ml-2 text-green-600 font-medium">• Live Update</span>
             </div>
           </div>
         </div>
@@ -184,50 +153,50 @@ const Laporan = () => {
           </div>
         ) : (
           <>
-            {/* MAP VIEW */}
-            {viewMode === 'map' && (
-              <div className="mb-8">
-                <div className="bg-white rounded-xl shadow-lg p-4">
-                  <div className="h-[600px] rounded-lg overflow-hidden">
-                    <MapView 
-                      reports={reports} 
-                      colorBy="status" 
-                      showTPS={false}
-                    />
+            {/* MAP SECTION */}
+            <div className="mb-8">
+              <div className="bg-white rounded-xl shadow-lg p-4">
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">Peta Lokasi Laporan</h2>
+                <div className="h-[600px] rounded-lg overflow-hidden">
+                  <MapView 
+                    reports={reports} 
+                    colorBy="status" 
+                    showTPS={false}
+                  />
+                </div>
+                <div className="mt-4 grid grid-cols-2 md:grid-cols-6 gap-3 text-center text-sm">
+                  <div className="flex items-center justify-center gap-2 bg-red-50 p-2 rounded-lg">
+                    <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                    <span className="font-medium text-red-700">Pending</span>
                   </div>
-                  <div className="mt-4 grid grid-cols-2 md:grid-cols-6 gap-3 text-center text-sm">
-                    <div className="flex items-center justify-center gap-2 bg-red-50 p-2 rounded-lg">
-                      <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                      <span className="font-medium text-red-700">Pending</span>
-                    </div>
-                    <div className="flex items-center justify-center gap-2 bg-cyan-50 p-2 rounded-lg">
-                      <div className="w-3 h-3 bg-cyan-500 rounded-full"></div>
-                      <span className="font-medium text-cyan-700">Approved</span>
-                    </div>
-                    <div className="flex items-center justify-center gap-2 bg-purple-50 p-2 rounded-lg">
-                      <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-                      <span className="font-medium text-purple-700">Assigned</span>
-                    </div>
-                    <div className="flex items-center justify-center gap-2 bg-orange-50 p-2 rounded-lg">
-                      <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
-                      <span className="font-medium text-orange-700">In Progress</span>
-                    </div>
-                    <div className="flex items-center justify-center gap-2 bg-green-50 p-2 rounded-lg">
-                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                      <span className="font-medium text-green-700">Completed</span>
-                    </div>
-                    <div className="flex items-center justify-center gap-2 bg-gray-50 p-2 rounded-lg">
-                      <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
-                      <span className="font-medium text-gray-700">Rejected</span>
-                    </div>
+                  <div className="flex items-center justify-center gap-2 bg-cyan-50 p-2 rounded-lg">
+                    <div className="w-3 h-3 bg-cyan-500 rounded-full"></div>
+                    <span className="font-medium text-cyan-700">Approved</span>
+                  </div>
+                  <div className="flex items-center justify-center gap-2 bg-purple-50 p-2 rounded-lg">
+                    <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                    <span className="font-medium text-purple-700">Assigned</span>
+                  </div>
+                  <div className="flex items-center justify-center gap-2 bg-orange-50 p-2 rounded-lg">
+                    <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+                    <span className="font-medium text-orange-700">In Progress</span>
+                  </div>
+                  <div className="flex items-center justify-center gap-2 bg-green-50 p-2 rounded-lg">
+                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                    <span className="font-medium text-green-700">Completed</span>
+                  </div>
+                  <div className="flex items-center justify-center gap-2 bg-gray-50 p-2 rounded-lg">
+                    <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
+                    <span className="font-medium text-gray-700">Rejected</span>
                   </div>
                 </div>
               </div>
-            )}
+            </div>
 
-            {/* LIST VIEW */}
-            {viewMode === 'list' && (
-              <>
+            {/* LIST SECTION */}
+            <div className="mb-4">
+              <h2 className="text-2xl font-bold text-gray-800 mb-6">Daftar Laporan</h2>
+            </div>
             {/* Reports Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               {reports.map((report) => (
@@ -236,9 +205,13 @@ const Laporan = () => {
                   {report.photo ? (
                     <div className="h-48 bg-gray-200 overflow-hidden">
                       <img
-                        src={`/uploads/${report.photo}`}
+                        src={`${API_URL}/uploads/${report.photo}`}
                         alt="Foto laporan"
                         className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"%3E%3Crect fill="%23f0f0f0" width="100" height="100"/%3E%3Ctext fill="%23999" x="50" y="50" text-anchor="middle" dy=".3em"%3ENo Image%3C/text%3E%3C/svg%3E';
+                        }}
                       />
                     </div>
                   ) : (
@@ -313,8 +286,6 @@ const Laporan = () => {
                   Next →
                 </button>
               </div>
-            )}
-              </>
             )}
           </>
         )}
