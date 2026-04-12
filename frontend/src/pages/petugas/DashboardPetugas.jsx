@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { usersAPI, reportsAPI } from '../../services/api';
 import StatusBadge from '../../components/StatusBadge';
 import PetugasNavigationMap from '../../components/PetugasNavigationMap';
+import { getUploadUrl } from '../../utils/imageHelper';
 
 const DashboardPetugas = () => {
   const [tasks, setTasks] = useState([]);
@@ -253,7 +254,7 @@ const DashboardPetugas = () => {
                 <div key={task.id} className="card border-l-4 border-orange-500">
                   {task.photo && (
                     <img 
-                      src={`/uploads/${task.photo}`} 
+                      src={getUploadUrl(task.photo)}
                       alt="Laporan" 
                       className="w-full h-48 object-cover rounded-lg mb-4"
                     />

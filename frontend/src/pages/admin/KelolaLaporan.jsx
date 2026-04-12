@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { reportsAPI, usersAPI } from '../../services/api';
 import StatusBadge from '../../components/StatusBadge';
 import { findNearestTPS, formatDistance, getPriority } from '../../utils/distance';
+import { getUploadUrl } from '../../utils/imageHelper';
 
 const KelolaLaporan = () => {
   const [reports, setReports] = useState([]);
@@ -333,7 +334,7 @@ const KelolaLaporan = () => {
                   <div className="mt-4">
                     <p className="text-gray-600 mb-2">Foto Laporan</p>
                     <img
-                      src={`http://localhost:5000/uploads/${selectedReport.photo}`}
+                      src={getUploadUrl(selectedReport.photo)}
                       alt="Laporan"
                       className="w-full max-h-96 object-contain rounded-lg border"
                       onError={(e) => {

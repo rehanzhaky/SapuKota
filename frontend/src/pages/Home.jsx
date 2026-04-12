@@ -4,6 +4,7 @@ import { reportsAPI, usersAPI } from '../services/api';
 import StatusBadge from '../components/StatusBadge';
 import CountUp from '../components/CountUp';
 import heroImage from '../assets/Img.png';
+import { getUploadUrl } from '../utils/imageHelper';
 
 // Static data untuk tampilan sementara
 const staticReports = [
@@ -378,7 +379,7 @@ const Home = () => {
                         <div className="flex-shrink-0">
                           {report.photo ? (
                             <img 
-                              src={`/uploads/${report.photo}`} 
+                              src={getUploadUrl(report.photo)}
                               alt="Reporter" 
                               className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover"
                             />
@@ -422,27 +423,165 @@ const Home = () => {
 
       {/* Edukasi Section */}
       <section className="py-12 sm:py-16 lg:py-20 bg-gray-50">
-        <div className="container mx-auto px-4 sm:px-6">
-          <div className="text-center max-w-2xl mx-auto">
-            <div className="mb-4 sm:mb-6">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto bg-green-100 rounded-full flex items-center justify-center">
-                <svg className="w-8 h-8 sm:w-10 sm:h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                </svg>
-              </div>
-            </div>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-20">
+          <div className="text-center mb-8 sm:mb-12">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 sm:mb-4">
               Edukasi Lingkungan
             </h2>
-            <p className="text-gray-600 text-base sm:text-lg mb-6 sm:mb-8">
-              Konten edukasi tentang pengelolaan sampah dan kelestarian lingkungan
+            <p className="text-gray-600 text-base sm:text-lg">
+              Mari bersama-sama memahami pentingnya pengelolaan sampah yang baik
             </p>
-            <div className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 bg-yellow-50 border-2 border-yellow-200 rounded-full">
-              <svg className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span className="text-yellow-800 font-medium text-sm sm:text-base">Sedang Dalam Pengembangan</span>
+          </div>
+
+          {/* Apa Itu TPS Liar */}
+          <div className="mb-12 sm:mb-16 bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
+            <div className="bg-gradient-to-r from-red-50 to-orange-50 px-6 sm:px-8 py-6">
+              <h3 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                Apa Itu TPS Liar?
+              </h3>
             </div>
+            
+            <div className="p-6 sm:p-8">
+              {/* Images Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                <div className="rounded-xl overflow-hidden shadow-md bg-red-100 h-40 sm:h-48 flex items-center justify-center">
+                  <div className="text-center p-4">
+                    <svg className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-2 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    <p className="text-xs sm:text-sm text-gray-600 font-medium">Sampah Berserakan</p>
+                  </div>
+                </div>
+                <div className="rounded-xl overflow-hidden shadow-md bg-red-100 h-40 sm:h-48 flex items-center justify-center">
+                  <div className="text-center p-4">
+                    <svg className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-2 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <p className="text-xs sm:text-sm text-gray-600 font-medium">TPS Liar Ilegal</p>
+                  </div>
+                </div>
+                <div className="rounded-xl overflow-hidden shadow-md bg-red-100 h-40 sm:h-48 flex items-center justify-center">
+                  <div className="text-center p-4">
+                    <svg className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-2 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
+                    </svg>
+                    <p className="text-xs sm:text-sm text-gray-600 font-medium">Pencemaran Lingkungan</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Description */}
+              <div className="bg-red-50 rounded-xl p-4 sm:p-6 border-l-4 border-red-500">
+                <p className="text-gray-700 text-sm sm:text-base lg:text-lg leading-relaxed">
+                  TPS liar adalah <span className="font-semibold">tempat pembuangan sampah yang tidak resmi</span> dan <span className="font-semibold">tidak memiliki izin</span>. 
+                  Biasanya, sampah di tempat-tempat seperti ini berada di pinggir jalan, lahan kosong, atau area umum, dan kita mengeluhkan pencemaran 
+                  lingkungan serta masalah kesehatan.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* TPS Resmi VS TPS Liar */}
+          <div className="mb-8">
+            <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-center text-gray-900 mb-8 sm:mb-10">
+              TPS Resmi VS TPS Liar
+            </h3>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+              {/* TPS Resmi Card */}
+              <div className="bg-white border-2 border-green-300 rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+                <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 sm:p-8">
+                  <div className="bg-green-200 rounded-2xl p-4 sm:p-6 h-40 sm:h-48 flex items-center justify-center mb-4">
+                    <div className="text-center">
+                      <svg className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <p className="text-xs sm:text-sm text-gray-600 font-medium">TPS Resmi</p>
+                    </div>
+                  </div>
+                  <h4 className="text-xl sm:text-2xl font-bold text-center text-green-700">
+                    TPS Resmi
+                  </h4>
+                </div>
+                <div className="p-6 sm:p-8">
+                  <ul className="space-y-3 sm:space-y-4">
+                    <li className="flex items-start">
+                      <svg className="w-5 h-5 sm:w-6 sm:h-6 text-green-600 mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      <span className="text-gray-700 text-sm sm:text-base lg:text-lg">Ada Izin</span>
+                    </li>
+                    <li className="flex items-start">
+                      <svg className="w-5 h-5 sm:w-6 sm:h-6 text-green-600 mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      <span className="text-gray-700 text-sm sm:text-base lg:text-lg">Tertata</span>
+                    </li>
+                    <li className="flex items-start">
+                      <svg className="w-5 h-5 sm:w-6 sm:h-6 text-green-600 mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      <span className="text-gray-700 text-sm sm:text-base lg:text-lg">Diangkut secara rutin</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* TPS Liar Card */}
+              <div className="bg-white border-2 border-red-300 rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+                <div className="bg-gradient-to-br from-red-50 to-red-100 p-6 sm:p-8">
+                  <div className="bg-red-200 rounded-2xl p-4 sm:p-6 h-40 sm:h-48 flex items-center justify-center mb-4">
+                    <div className="text-center">
+                      <svg className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-2 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <p className="text-xs sm:text-sm text-gray-600 font-medium">TPS Liar</p>
+                    </div>
+                  </div>
+                  <h4 className="text-xl sm:text-2xl font-bold text-center text-red-700">
+                    TPS Liar
+                  </h4>
+                </div>
+                <div className="p-6 sm:p-8">
+                  <ul className="space-y-3 sm:space-y-4">
+                    <li className="flex items-start">
+                      <svg className="w-5 h-5 sm:w-6 sm:h-6 text-red-600 mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      </svg>
+                      <span className="text-gray-700 text-sm sm:text-base lg:text-lg">Tidak resmi</span>
+                    </li>
+                    <li className="flex items-start">
+                      <svg className="w-5 h-5 sm:w-6 sm:h-6 text-red-600 mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      </svg>
+                      <span className="text-gray-700 text-sm sm:text-base lg:text-lg">Sembarangan</span>
+                    </li>
+                    <li className="flex items-start">
+                      <svg className="w-5 h-5 sm:w-6 sm:h-6 text-red-600 mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      </svg>
+                      <span className="text-gray-700 text-sm sm:text-base lg:text-lg">Menimbulkan masalah</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Call to Action */}
+          <div className="bg-gradient-to-r from-primary-500 to-green-600 rounded-2xl p-6 sm:p-10 lg:p-12 text-center text-white shadow-xl">
+            <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-3 sm:mb-4">
+              Mari Bersama Jaga Lingkungan!
+            </h3>
+            <p className="text-base sm:text-lg lg:text-xl mb-5 sm:mb-6 opacity-90">
+              Jika Anda menemukan TPS liar di sekitar Anda, segera laporkan
+            </p>
+            <button
+              onClick={handleOpenModal}
+              className="bg-white text-primary-600 hover:bg-gray-100 font-semibold px-6 sm:px-8 py-2.5 sm:py-3 rounded-full transition-colors text-base sm:text-lg shadow-lg"
+            >
+              Laporkan Sekarang
+            </button>
           </div>
         </div>
       </section>

@@ -5,6 +5,7 @@ import Loading from '../../components/Loading';
 import MapView from '../../components/MapView';
 import PetugasTrackingMap from '../../components/PetugasTrackingMap';
 import { findNearestTPS, formatDistance } from '../../utils/distance';
+import { getUploadUrl } from '../../utils/imageHelper';
 
 const DashboardDLH = () => {
   const [stats, setStats] = useState(null);
@@ -138,36 +139,10 @@ const DashboardDLH = () => {
     return <Loading />;
   }
 
-  const statusData = stats?.reportsByStatus || [];
-  const petugasData = stats?.reportsByPetugas || [];
-
   return (
     <div>
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white rounded-2xl shadow-md p-6 border-l-4 border-blue-500 hover:shadow-lg transition-shadow">
-          <p className="text-gray-500 text-sm font-medium mb-2">Total Laporan</p>
-          <p className="text-4xl font-bold text-gray-900">{stats?.totalReports || 0}</p>
-        </div>
-
-        <div className="bg-white rounded-2xl shadow-md p-6 border-l-4 border-yellow-500 hover:shadow-lg transition-shadow">
-          <p className="text-gray-500 text-sm font-medium mb-2">Menunggu Review</p>
-          <p className="text-4xl font-bold text-gray-900">{stats?.pendingReports || 0}</p>
-        </div>
-
-        <div className="bg-white rounded-2xl shadow-md p-6 border-l-4 border-orange-500 hover:shadow-lg transition-shadow">
-          <p className="text-gray-500 text-sm font-medium mb-2">Dalam Proses</p>
-          <p className="text-4xl font-bold text-gray-900">{stats?.inProgressReports || 0}</p>
-        </div>
-
-        <div className="bg-white rounded-2xl shadow-md p-6 border-l-4 border-green-500 hover:shadow-lg transition-shadow">
-          <p className="text-gray-500 text-sm font-medium mb-2">Selesai Bulan Ini</p>
-          <p className="text-4xl font-bold text-gray-900">{stats?.completedThisMonth || 0}</p>
-        </div>
-      </div>
-
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <Link to="/admin/laporan" className="group bg-white rounded-2xl shadow-md p-8 hover:shadow-xl transition-all border border-gray-200 hover:border-primary-500">
           <div>
             <h3 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-primary-600 transition-colors">Kelola Laporan</h3>
@@ -181,62 +156,6 @@ const DashboardDLH = () => {
             <p className="text-gray-600 text-sm leading-relaxed">Tambah, edit, dan kelola data petugas lapangan</p>
           </div>
         </Link>
-
-        <Link to="/admin/statistik" className="group bg-white rounded-2xl shadow-md p-8 hover:shadow-xl transition-all border border-gray-200 hover:border-primary-500">
-          <div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-primary-600 transition-colors">Statistik</h3>
-            <p className="text-gray-600 text-sm leading-relaxed">Lihat performa dan analisis data laporan</p>
-          </div>
-        </Link>
-      </div>
-
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <div className="bg-white rounded-2xl shadow-md p-8 border border-gray-200">
-          <h3 className="text-2xl font-bold text-gray-900 mb-6">Laporan per Status</h3>
-          <div className="space-y-4">
-            {statusData.length > 0 ? statusData.map((item) => (
-              <div key={item.status} className="flex items-center justify-between">
-                <span className="text-gray-700 capitalize font-medium">{item.status.replace(/_/g, ' ')}</span>
-                <div className="flex items-center space-x-3">
-                  <div className="w-48 bg-gray-200 rounded-full h-3">
-                    <div 
-                      className="bg-primary-500 h-3 rounded-full transition-all" 
-                      style={{ width: `${(item.count / stats.totalReports) * 100}%` }}
-                    ></div>
-                  </div>
-                  <span className="font-bold text-gray-800 w-12 text-right">{item.count}</span>
-                </div>
-              </div>
-            )) : (
-              <p className="text-gray-500 text-center py-8">Belum ada data laporan</p>
-            )}
-          </div>
-        </div>
-
-        <div className="bg-white rounded-2xl shadow-md p-8 border border-gray-200">
-          <h3 className="text-2xl font-bold text-gray-900 mb-6">Laporan per Petugas</h3>
-          <div className="space-y-4">
-            {petugasData.length > 0 ? petugasData.map((item) => (
-              <div key={item.assigned_to} className="flex items-center justify-between">
-                <span className="text-gray-700 font-medium text-sm">
-                  {item.assignedPetugas?.full_name || item.assignedPetugas?.name || `Petugas #${item.assigned_to}`}
-                </span>
-                <div className="flex items-center space-x-3">
-                  <div className="w-48 bg-gray-200 rounded-full h-3">
-                    <div 
-                      className="bg-secondary-500 h-3 rounded-full transition-all" 
-                      style={{ width: `${(item.count / stats.totalReports) * 100}%` }}
-                    ></div>
-                  </div>
-                  <span className="font-bold text-gray-800 w-12 text-right">{item.count}</span>
-                </div>
-              </div>
-            )) : (
-              <p className="text-gray-500 text-center py-8">Belum ada laporan yang ditugaskan</p>
-            )}
-          </div>
-        </div>
       </div>
 
       {/* Map View */}
@@ -380,7 +299,7 @@ const DashboardDLH = () => {
                 <div>
                   <p className="text-sm text-gray-600 mb-2">Foto Laporan</p>
                   <img
-                    src={`/uploads/${selectedReport.photo}`}
+                    src={getUploadUrl(selectedReport.photo)}
                     alt="Foto laporan"
                     className="w-full rounded-lg border border-gray-200"
                   />
