@@ -586,6 +586,100 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Jenis-jenis TPS Liar Section */}
+      <section className="py-12 sm:py-16 lg:py-20 bg-white">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-20">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 sm:mb-4">
+              Jenis-jenis TPS Liar
+            </h2>
+            <p className="text-gray-600 text-base sm:text-lg">
+              Kenali lokasi-lokasi yang sering menjadi tempat pembuangan sampah ilegal
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            {/* Di bawah jembatan */}
+            <div className="bg-white border-2 border-gray-200 rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+              <div className="h-48 sm:h-56 bg-gradient-to-br from-red-100 to-orange-100 flex items-center justify-center p-4">
+                <div className="text-center">
+                  <svg className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-3 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                  <p className="text-sm text-gray-600 font-medium">Dummy Image</p>
+                </div>
+              </div>
+              <div className="p-6">
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 text-center">
+                  Di bawah jembatan
+                </h3>
+                <p className="text-gray-600 text-sm sm:text-base text-center leading-relaxed">
+                  Sampah sering menumpuk di kolong jembatan karena area tersebut jarang dipantau dan sulit dijangkau
+                </p>
+              </div>
+            </div>
+
+            {/* Di pinggir jalan & selokan */}
+            <div className="bg-white border-2 border-gray-200 rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+              <div className="h-48 sm:h-56 bg-gradient-to-br from-orange-100 to-yellow-100 flex items-center justify-center p-4">
+                <div className="text-center">
+                  <svg className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-3 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                  </svg>
+                  <p className="text-sm text-gray-600 font-medium">Dummy Image</p>
+                </div>
+              </div>
+              <div className="p-6">
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 text-center">
+                  Di pinggir jalan<br />& selokan
+                </h3>
+                <p className="text-gray-600 text-sm sm:text-base text-center leading-relaxed">
+                  Pinggir jalan dan selokan menjadi sasaran pembuangan sampah yang mengganggu kenyamanan dan kebersihan
+                </p>
+              </div>
+            </div>
+
+            {/* Di lahan kosong */}
+            <div className="bg-white border-2 border-gray-200 rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow md:col-span-2 lg:col-span-1">
+              <div className="h-48 sm:h-56 bg-gradient-to-br from-yellow-100 to-amber-100 flex items-center justify-center p-4">
+                <div className="text-center">
+                  <svg className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-3 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+                  </svg>
+                  <p className="text-sm text-gray-600 font-medium">Dummy Image</p>
+                </div>
+              </div>
+              <div className="p-6">
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 text-center">
+                  Di lahan kosong
+                </h3>
+                <p className="text-gray-600 text-sm sm:text-base text-center leading-relaxed">
+                  Lahan kosong sering disalahgunakan sebagai tempat pembuangan sampah karena tidak ada pengawasan
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Info Box */}
+          <div className="mt-10 sm:mt-12 bg-gradient-to-r from-amber-50 to-orange-50 border-l-4 border-orange-500 rounded-xl p-6 sm:p-8">
+            <div className="flex items-start">
+              <svg className="w-6 h-6 sm:w-8 sm:h-8 text-orange-500 mr-4 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+              <div>
+                <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">
+                  Penting untuk Diketahui!
+                </h4>
+                <p className="text-gray-700 text-sm sm:text-base leading-relaxed">
+                  Jika Anda menemukan salah satu jenis TPS liar di atas, segera laporkan melalui aplikasi kami. 
+                  Dengan melaporkan, Anda membantu pemerintah dalam menangani masalah sampah di lingkungan sekitar.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* FAQ Section */}
       <section className="py-12 sm:py-16 bg-white">
         <div className="container mx-auto px-4 sm:px-6 max-w-5xl">
