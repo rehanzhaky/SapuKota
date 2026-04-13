@@ -8,6 +8,8 @@ import bawahJembatanImage from '../assets/bawahjembatan.jpeg';
 import pinggirJalanImage from '../assets/pinggirjalan.jpeg';
 import tpsResmiImage from '../assets/tpsresmi.jpeg';
 import tpsLiarImage from '../assets/tpsliar.jpeg';
+import sampahBerserakanImage from '../assets/sampahberserakan.jpeg';
+import pencemaranLingkunganImage from '../assets/pencemaranlingkungan.jpeg';
 import { getUploadUrl } from '../utils/imageHelper';
 
 // Static data untuk tampilan sementara
@@ -448,29 +450,26 @@ const Home = () => {
             <div className="p-6 sm:p-8">
               {/* Images Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                <div className="rounded-xl overflow-hidden shadow-md bg-red-100 h-40 sm:h-48 flex items-center justify-center">
-                  <div className="text-center p-4">
-                    <svg className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-2 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                    <p className="text-xs sm:text-sm text-gray-600 font-medium">Sampah Berserakan</p>
-                  </div>
+                <div className="rounded-xl overflow-hidden shadow-md h-40 sm:h-48">
+                  <img 
+                    src={sampahBerserakanImage} 
+                    alt="Sampah Berserakan" 
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-                <div className="rounded-xl overflow-hidden shadow-md bg-red-100 h-40 sm:h-48 flex items-center justify-center">
-                  <div className="text-center p-4">
-                    <svg className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-2 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                    <p className="text-xs sm:text-sm text-gray-600 font-medium">TPS Liar Ilegal</p>
-                  </div>
+                <div className="rounded-xl overflow-hidden shadow-md h-40 sm:h-48">
+                  <img 
+                    src={tpsLiarImage} 
+                    alt="TPS Liar Ilegal" 
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-                <div className="rounded-xl overflow-hidden shadow-md bg-red-100 h-40 sm:h-48 flex items-center justify-center">
-                  <div className="text-center p-4">
-                    <svg className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-2 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
-                    </svg>
-                    <p className="text-xs sm:text-sm text-gray-600 font-medium">Pencemaran Lingkungan</p>
-                  </div>
+                <div className="rounded-xl overflow-hidden shadow-md h-40 sm:h-48">
+                  <img 
+                    src={pencemaranLingkunganImage} 
+                    alt="Pencemaran Lingkungan" 
+                    className="w-full h-full object-cover"
+                  />
                 </div>
               </div>
 
