@@ -6,6 +6,8 @@ import CountUp from '../components/CountUp';
 import heroImage from '../assets/Img.png';
 import bawahJembatanImage from '../assets/bawahjembatan.jpeg';
 import pinggirJalanImage from '../assets/pinggirjalan.jpeg';
+import tpsResmiImage from '../assets/tpsresmi.jpeg';
+import tpsLiarImage from '../assets/tpsliar.jpeg';
 import { getUploadUrl } from '../utils/imageHelper';
 
 // Static data untuk tampilan sementara
@@ -493,13 +495,12 @@ const Home = () => {
               {/* TPS Resmi Card */}
               <div className="bg-white border-2 border-green-300 rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
                 <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 sm:p-8">
-                  <div className="bg-green-200 rounded-2xl p-4 sm:p-6 h-40 sm:h-48 flex items-center justify-center mb-4">
-                    <div className="text-center">
-                      <svg className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <p className="text-xs sm:text-sm text-gray-600 font-medium">TPS Resmi</p>
-                    </div>
+                  <div className="rounded-2xl overflow-hidden h-40 sm:h-48 mb-4">
+                    <img 
+                      src={tpsResmiImage} 
+                      alt="TPS Resmi" 
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   <h4 className="text-xl sm:text-2xl font-bold text-center text-green-700">
                     TPS Resmi
@@ -532,13 +533,12 @@ const Home = () => {
               {/* TPS Liar Card */}
               <div className="bg-white border-2 border-red-300 rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
                 <div className="bg-gradient-to-br from-red-50 to-red-100 p-6 sm:p-8">
-                  <div className="bg-red-200 rounded-2xl p-4 sm:p-6 h-40 sm:h-48 flex items-center justify-center mb-4">
-                    <div className="text-center">
-                      <svg className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-2 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <p className="text-xs sm:text-sm text-gray-600 font-medium">TPS Liar</p>
-                    </div>
+                  <div className="rounded-2xl overflow-hidden h-40 sm:h-48 mb-4">
+                    <img 
+                      src={tpsLiarImage} 
+                      alt="TPS Liar" 
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   <h4 className="text-xl sm:text-2xl font-bold text-center text-red-700">
                     TPS Liar
@@ -568,22 +568,6 @@ const Home = () => {
                 </div>
               </div>
             </div>
-          </div>
-
-          {/* Call to Action */}
-          <div className="bg-gradient-to-r from-primary-500 to-green-600 rounded-2xl p-6 sm:p-10 lg:p-12 text-center text-white shadow-xl">
-            <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-3 sm:mb-4">
-              Mari Bersama Jaga Lingkungan!
-            </h3>
-            <p className="text-base sm:text-lg lg:text-xl mb-5 sm:mb-6 opacity-90">
-              Jika Anda menemukan TPS liar di sekitar Anda, segera laporkan
-            </p>
-            <button
-              onClick={handleOpenModal}
-              className="bg-white text-primary-600 hover:bg-gray-100 font-semibold px-6 sm:px-8 py-2.5 sm:py-3 rounded-full transition-colors text-base sm:text-lg shadow-lg"
-            >
-              Laporkan Sekarang
-            </button>
           </div>
         </div>
       </section>
