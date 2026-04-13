@@ -4,6 +4,8 @@ import { reportsAPI, usersAPI } from '../services/api';
 import StatusBadge from '../components/StatusBadge';
 import CountUp from '../components/CountUp';
 import heroImage from '../assets/Img.png';
+import bawahJembatanImage from '../assets/bawahjembatan.jpeg';
+import pinggirJalanImage from '../assets/pinggirjalan.jpeg';
 import { getUploadUrl } from '../utils/imageHelper';
 
 // Static data untuk tampilan sementara
@@ -601,13 +603,12 @@ const Home = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             {/* Di bawah jembatan */}
             <div className="bg-white border-2 border-gray-200 rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-              <div className="h-48 sm:h-56 bg-gradient-to-br from-red-100 to-orange-100 flex items-center justify-center p-4">
-                <div className="text-center">
-                  <svg className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-3 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                  </svg>
-                  <p className="text-sm text-gray-600 font-medium">Dummy Image</p>
-                </div>
+              <div className="h-48 sm:h-56 overflow-hidden">
+                <img 
+                  src={bawahJembatanImage} 
+                  alt="TPS Liar di bawah jembatan" 
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div className="p-6">
                 <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 text-center">
@@ -621,13 +622,12 @@ const Home = () => {
 
             {/* Di pinggir jalan & selokan */}
             <div className="bg-white border-2 border-gray-200 rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-              <div className="h-48 sm:h-56 bg-gradient-to-br from-orange-100 to-yellow-100 flex items-center justify-center p-4">
-                <div className="text-center">
-                  <svg className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-3 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                  </svg>
-                  <p className="text-sm text-gray-600 font-medium">Dummy Image</p>
-                </div>
+              <div className="h-48 sm:h-56 overflow-hidden">
+                <img 
+                  src={pinggirJalanImage} 
+                  alt="TPS Liar di pinggir jalan dan selokan" 
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div className="p-6">
                 <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 text-center">
@@ -641,13 +641,12 @@ const Home = () => {
 
             {/* Di lahan kosong */}
             <div className="bg-white border-2 border-gray-200 rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow md:col-span-2 lg:col-span-1">
-              <div className="h-48 sm:h-56 bg-gradient-to-br from-yellow-100 to-amber-100 flex items-center justify-center p-4">
-                <div className="text-center">
-                  <svg className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-3 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
-                  </svg>
-                  <p className="text-sm text-gray-600 font-medium">Dummy Image</p>
-                </div>
+              <div className="h-48 sm:h-56 overflow-hidden">
+                <img 
+                  src={pinggirJalanImage} 
+                  alt="TPS Liar di lahan kosong" 
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div className="p-6">
                 <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 text-center">
