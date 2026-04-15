@@ -8,16 +8,18 @@ const upload = require('../middleware/upload');
 router.post('/', upload.single('photo'), reportController.createReport);
 router.get('/', reportController.getAllReports);
 router.get('/recent', reportController.getRecentReports);
-router.get('/:id', reportController.getReportById);
 
-// Admin routes
+// Admin routes (before /:id to avoid conflicts)
 router.put('/:id/status', auth, adminDLH, reportController.updateReportStatus);
 router.delete('/:id', auth, adminDLH, reportController.deleteReport);
 
-// Petugas routes
+// Petugas routes (before /:id to avoid conflicts)
 router.post('/:id/accept', auth, petugas, reportController.acceptTask);
 router.put('/:id/progress', auth, petugas, upload.single('completion_photo'), reportController.updateTaskProgress);
 router.post('/:id/checkin', auth, petugas, reportController.checkInAtLocation);
+
+// Public route for getting by ID (must be last among /:id routes)
+router.get('/:id', reportController.getReportById);
 
 module.exports = router;
 
