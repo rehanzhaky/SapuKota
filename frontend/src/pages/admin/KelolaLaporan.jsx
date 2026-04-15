@@ -71,6 +71,21 @@ const KelolaLaporan = () => {
     }
   };
 
+  const handleDelete = async (reportId) => {
+    if (!window.confirm('Apakah Anda yakin ingin menghapus laporan ini? Tindakan ini tidak dapat dibatalkan.')) {
+      return;
+    }
+
+    try {
+      await reportsAPI.delete(reportId);
+      alert('Laporan berhasil dihapus!');
+      handleCloseModal();
+      fetchData();
+    } catch (error) {
+      alert('Gagal menghapus laporan: ' + (error.response?.data?.message || error.message));
+    }
+  };
+
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('id-ID', {
       day: 'numeric',
@@ -413,6 +428,13 @@ const KelolaLaporan = () => {
                     className="btn-outline px-6"
                   >
                     Batal
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(selectedReport.id)}
+                    className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors font-medium"
+                  >
+                    🗑️ Hapus
                   </button>
                 </div>
               </form>

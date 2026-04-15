@@ -12,6 +12,7 @@ router.get('/:id', reportController.getReportById);
 
 // Admin routes
 router.put('/:id/status', auth, adminDLH, reportController.updateReportStatus);
+router.delete('/:id', auth, adminDLH, reportController.deleteReport);
 
 // Petugas routes
 router.post('/:id/accept', auth, petugas, reportController.acceptTask);

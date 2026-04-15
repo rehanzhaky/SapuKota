@@ -47,6 +47,7 @@ export const reportsAPI = {
   getRecent: () => api.get('/reports/recent'),
   getById: (id) => api.get(`/reports/${id}`),
   updateStatus: (id, data) => api.put(`/reports/${id}/status`, data),
+  delete: (id) => api.delete(`/reports/${id}`),
   acceptTask: (id, data) => api.post(`/reports/${id}/accept`, data),
   updateProgress: (id, formData) => {
     const token = localStorage.getItem('token');

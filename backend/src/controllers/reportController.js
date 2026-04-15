@@ -284,3 +284,25 @@ exports.checkInAtLocation = async (req, res) => {
   }
 };
 
+// Admin - Delete report
+exports.deleteReport = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const report = await Report.findByPk(id);
+    
+    if (!report) {
+      return res.status(404).json({ message: 'Report not found' });
+    }
+
+    await report.destroy();
+
+    res.json({
+      message: 'Report deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete report error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
