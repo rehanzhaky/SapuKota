@@ -66,6 +66,15 @@ git push -u origin main
    JWT_SECRET=railway_secret_123456789012345678901234567890
    PORT=5000
    ```
+   
+   **⚠️ IMPORTANT: Tambahkan juga Cloudinary credentials** (untuk upload foto):
+   ```
+   CLOUDINARY_CLOUD_NAME=your_cloud_name
+   CLOUDINARY_API_KEY=your_api_key
+   CLOUDINARY_API_SECRET=your_api_secret
+   ```
+   
+   📚 **Belum punya Cloudinary?** Ikuti panduan: [SETUP_CLOUDINARY.md](SETUP_CLOUDINARY.md) (5 menit, GRATIS!)
 
 4. **Connect ke MySQL Database:**
    - Klik tab "Variables" lagi

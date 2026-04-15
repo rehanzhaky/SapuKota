@@ -14,11 +14,18 @@ export const getBaseUrl = () => {
 
 /**
  * Get the full URL for an uploaded image
- * @param {string} filename - The filename from the database (e.g., "1234567890.jpg")
+ * @param {string} filename - The filename from the database (e.g., "1234567890.jpg") or full Cloudinary URL
  * @returns {string} Full URL to the image
  */
 export const getUploadUrl = (filename) => {
   if (!filename) return '';
+  
+  // If it's already a full URL (from Cloudinary), return as is
+  if (filename.startsWith('http://') || filename.startsWith('https://')) {
+    return filename;
+  }
+  
+  // Otherwise, it's a local filename, construct the URL
   const baseUrl = getBaseUrl();
   return `${baseUrl}/uploads/${filename}`;
 };

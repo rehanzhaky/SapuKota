@@ -8,9 +8,6 @@ const Footer = () => {
           <div>
             <div className="flex items-center space-x-2 mb-3 sm:mb-4">
               <img src={sapuLogo} alt="SapuKota Logo" className="h-8 w-auto" />
-              <h3 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-primary-400 to-secondary-400 bg-clip-text text-transparent">
-                SapuKota.id
-              </h3>
             </div>
             <p className="text-gray-300 text-xs sm:text-sm">
               Sistem pelaporan sampah liar untuk kota yang lebih bersih dan sehat.
@@ -36,7 +33,7 @@ const Footer = () => {
         </div>
         
         <div className="border-t border-gray-700 mt-6 sm:mt-8 pt-4 sm:pt-6 text-center text-xs sm:text-sm text-gray-400">
-          <p>&copy; 2026 SapuKota.id - Dinas Lingkungan Hidup. All rights reserved.</p>
+          <p>&copy; 2026 Dinas Lingkungan Hidup. All rights reserved.</p>
         </div>
       </div>
     </footer>

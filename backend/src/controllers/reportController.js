@@ -6,13 +6,19 @@ exports.createReport = async (req, res) => {
   try {
     const { title, location, latitude, longitude, description } = req.body;
 
+    // Handle photo URL - Cloudinary provides 'path' (full URL), local storage provides 'filename'
+    let photoUrl = null;
+    if (req.file) {
+      photoUrl = req.file.path || req.file.filename;
+    }
+
     const report = await Report.create({
       title,
       location,
       latitude: latitude ? parseFloat(latitude) : null,
       longitude: longitude ? parseFloat(longitude) : null,
       description,
-      photo: req.file ? req.file.filename : null,
+      photo: photoUrl,
       status: 'pending'
     });
 
